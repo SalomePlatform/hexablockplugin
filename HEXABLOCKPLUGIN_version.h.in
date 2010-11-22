@@ -1,0 +1,34 @@
+//  Copyright (C) 2004-2010  CEA/DEN, EDF R&D
+//
+//  This library is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU Lesser General Public
+//  License as published by the Free Software Foundation; either
+//  version 2.1 of the License.
+//
+//  This library is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//  Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with this library; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+//
+//  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
+//
+
+//  File   : HEXABLOCKPLUGIN_version.h
+//  Author : Lioka RAZAFINDRAZAKA (CEA)
+//  Module : SALOME
+//
+#if !defined(__HEXABLOCKPLUGIN_VERSION_H__)
+#define __HEXABLOCKPLUGIN_VERSION_H__
+
+/*
+  HEXABLOCKPLUGIN_VERSION is (major << 16) + (minor << 8) + patch.
+*/
+
+#define HEXABLOCKPLUGIN_VERSION_STR "@VERSION@"
+#define HEXABLOCKPLUGIN_VERSION     @XVERSION@
+
+#endif // __HEXABLOCKPLUGIN_VERSION_H__

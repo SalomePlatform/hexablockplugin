@@ -1,0 +1,63 @@
+//  Copyright (C) 2004-2010  CEA/DEN, EDF R&D
+//
+//  This library is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU Lesser General Public
+//  License as published by the Free Software Foundation; either
+//  version 2.1 of the License.
+//
+//  This library is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//  Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with this library; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+//
+//  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
+//
+
+//  File   : HEXABLOCK_Algorithm.idl
+//  Author : Lioka RAZAFINDRAZAKA (CEA)
+//  $Header$
+//
+#ifndef _HEXABLOCK_Algorithm_IDL_
+#define _HEXABLOCK_Algorithm_IDL_
+
+#include "SALOME_Exception.idl"
+#include "SMESH_Hypothesis.idl"
+
+#include "Document.idl"
+/*!
+ * HEXABLOCKPlugin: interfaces to HEXABLOCK related hypotheses and algorithms
+ */
+module HEXABLOCKPlugin
+{
+
+  /*!
+   * HEXABLOCKPlugin_HEXABLOCK: interface of "hexaBlock" algorithm
+   */
+  interface HEXABLOCKPlugin_HEXABLOCK : SMESH::SMESH_3D_Algo
+  {
+  };
+
+  /*!
+   * Parameters of "HexaBlock" algorithm
+   */
+  interface HEXABLOCKPlugin_Hypothesis : SMESH::SMESH_Hypothesis
+  {
+    /*!
+     * Define the document to be meshed, mandatory
+     */
+    void SetDocument(in HEXABLOCK_ORB::Document doc);
+    HEXABLOCK_ORB::Document GetDocument();
+
+    /*!
+     * To define the hight dimension to generated: 3 = hexas, 2 = quads, 1 = segments, 0 = nodes
+     */
+    void SetDimension(in long dim);
+    long GetDimension();
+  };
+};
+
+#endif
