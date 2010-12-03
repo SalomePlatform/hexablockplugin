@@ -50,6 +50,7 @@ dist_libHexaBlockEngine_la_SOURCES = \
 libHexaBlockEngine_la_CPPFLAGS =  \
 	$(KERNEL_CXXFLAGS)    \
 	$(CAS_CPPFLAGS)       \
+        $(VTK_INCLUDES)       \
 	$(GEOM_CXXFLAGS)      \
 	$(HEXABLOCK_CXXFLAGS) \
 	$(MED_CXXFLAGS)       \
