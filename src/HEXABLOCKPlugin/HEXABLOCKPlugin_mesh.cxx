@@ -16,8 +16,6 @@
 //
 //  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-//
-//  SMESH SMESHClient : tool to update client mesh structure by mesh from server
 //  File   : SMESH_HexaBlocks.cxx
 //  Author : 
 //  Module : SMESH
