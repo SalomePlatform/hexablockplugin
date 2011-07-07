@@ -67,6 +67,10 @@ class HEXABLOCKPLUGIN_EXPORT HEXABLOCKPlugin_Hypothesis_i:
   
     // Verify whether hypothesis supports given entity type 
     CORBA::Boolean IsDimSupported( SMESH::Dimension type );
+
+ private:
+    PortableServer::POA_var _poa;// POA reference
+
 };
 
 #endif

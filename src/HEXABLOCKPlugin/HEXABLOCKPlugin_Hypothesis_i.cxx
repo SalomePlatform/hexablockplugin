@@ -46,6 +46,7 @@ HEXABLOCKPlugin_Hypothesis_i::HEXABLOCKPlugin_Hypothesis_i (PortableServer::POA_
   myBaseImpl = new ::HEXABLOCKPlugin_Hypothesis (theGenImpl->GetANewId(),
                                               theStudyId,
                                               theGenImpl);
+  _poa = PortableServer::POA::_duplicate(thePOA);
 }
 
 //=======================================================================
@@ -88,7 +89,7 @@ CORBA::Boolean HEXABLOCKPlugin_Hypothesis_i::IsDimSupported( SMESH::Dimension ty
 HEXABLOCK_ORB::Document_ptr HEXABLOCKPlugin_Hypothesis_i::GetDocument() {
   ASSERT(myBaseImpl);
   HEXA_NS::Document* d = this->GetImpl()->GetDocument();
-  Document_impl* servantCorba = new Document_impl(d);
+  Document_impl* servantCorba = new Document_impl(_poa, d);
   HEXABLOCK_ORB::Document_ptr result = servantCorba->_this();
   return result;
 }
