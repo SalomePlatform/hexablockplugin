@@ -960,9 +960,9 @@ HEXA_NS::Hexa* _block2Hexa( const _Block& block,
 
 
     HEXA_NS::Hexa* hexa = NULL;
-    int nHexa = doc->countHexa();
+    int nHexa = doc->countUsedHexa();
     for (int j=0; j <nHexa; ++j ){
-      hexa = doc->getHexa(j);
+      hexa = doc->getUsedHexa(j);
       list<const SMDS_MeshNode* > nodeFromHexa;
       int nVx = hexa->countVertex();
       for ( int i=0; i <nVx; ++i ){

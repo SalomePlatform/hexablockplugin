@@ -183,10 +183,10 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute2D(SMESH_Mesh& theMesh)
   SMESH_HexaBlocks hexaBuilder(theMesh);
 
   // A) Vertex computation
-  int nVertex = doc->countVertex();
+  int nVertex = doc->countUsedVertex();
   HEXA_NS::Vertex* vertex = NULL;
   for ( int j=0; j <nVertex; ++j ){ //Computing each vertex of the document
-    vertex = doc->getVertex(j);
+    vertex = doc->getUsedVertex(j);
     hexaBuilder.computeVertex(*vertex);
   };
 
@@ -211,10 +211,10 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute2D(SMESH_Mesh& theMesh)
 
   // C) Quad computation
   std::map<HEXA_NS::Quad*, bool>  quadWays = hexaBuilder.computeQuadWays(doc);
-  int nQuad = doc->countQuad();
+  int nQuad = doc->countUsedQuad();
   HEXA_NS::Quad* quad = NULL;
   for (int j=0; j <nQuad; ++j ){ //Computing each quad of the document
-    quad = doc->getQuad(j);
+    quad = doc->getUsedQuad(j);
     int id = quad->getId();
     if ( quadWays.count(quad) > 0 )
       hexaBuilder.computeQuad(*quad, quadWays[quad]);
@@ -245,7 +245,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute2D(SMESH_Mesh& theMesh)
 //       int nVertex = doc->countVertex();
 //       HEXA_NS::Vertex* vertex = NULL;
 //       for ( int j=0; j <nVertex; ++j ){ //Computing each vertex of the document
-//         vertex = doc->getVertex(j);
+//         vertex = doc->getUsedVertex(j);
 //         hexaBuilder.computeVertex(*vertex);
 //       }
 
@@ -304,10 +304,10 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute1D(SMESH_Mesh& theMesh)
   SMESH_HexaBlocks hexaBuilder(theMesh);
 
   // A) Vertex computation
-  int nVertex = doc->countVertex();
+  int nVertex = doc->countUsedVertex();
   HEXA_NS::Vertex* vertex = NULL;
   for ( int j=0; j <nVertex; ++j ){ //Computing each vertex of the document
-    vertex = doc->getVertex(j);
+    vertex = doc->getUsedVertex(j);
     hexaBuilder.computeVertex(*vertex);
   };
 
@@ -345,10 +345,10 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute0D(SMESH_Mesh& theMesh)
   SMESH_HexaBlocks hexaBuilder(theMesh);
 
   // A) Vertex computation
-  int nVertex = doc->countVertex();
+  int nVertex = doc->countUsedVertex();
   HEXA_NS::Vertex* vertex = NULL;
   for ( int j=0; j <nVertex; ++j ){ //Computing each vertex of the document
-    vertex = doc->getVertex(j);
+    vertex = doc->getUsedVertex(j);
     hexaBuilder.computeVertex(*vertex);
   };
 

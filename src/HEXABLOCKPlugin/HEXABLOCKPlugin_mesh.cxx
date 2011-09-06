@@ -471,9 +471,9 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
   HEXA_NS::Vertex *e_0, *e_1 = NULL;
 
   // FIRST STEP: eliminate free quad + internal quad
-  int nTotalQuad = doc->countQuad();
+  int nTotalQuad = doc->countUsedQuad();
   for (int i=0; i < nTotalQuad; ++i ){
-    q = doc->getQuad(i);
+    q = doc->getUsedQuad(i);
     switch ( q->getNbrParents() ){ // parent == hexaedron
       case 0: case 2: quadWays[q] = true; break;
       case 1: skinQuad.push_back(q); break;
@@ -619,7 +619,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 // 
 //   // SECOND STEP
 //   q = first_q = skinQuad.front();
-//   e = q->getEdge(0);
+//   e = q->getUsedEdge(0);
 //   e_0 = e->getVertex(0);
 //   e_1 = e->getVertex(1);
 // 
@@ -632,7 +632,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 // 
 //       std::map<HEXA_NS::Edge*, std::pair<HEXA_NS::Vertex*, HEXA_NS::Vertex*> > localEdgeWays;
 //       while ( localEdgeWays.size() != 4 ){
-//           HEXA_NS::Edge* e = q->getEdge(i%4);
+//           HEXA_NS::Edge* e = q->getUsedEdge(i%4);
 //           if ( lastVertex == NULL ){
 //               HEXA_NS::Vertex* e_0 = e->getVertex(0);
 //               HEXA_NS::Vertex* e_1 = e->getVertex(1);
@@ -679,7 +679,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 //       //add new working quad
 //       for ( int i=0 ; i < 4; ++i ){
 //           HEXA_NS::Quad* next_q = NULL;
-//           HEXA_NS::Edge* e = q->getEdge(i);
+//           HEXA_NS::Edge* e = q->getUsedEdge(i);
 //           MESSAGE("NB PARENTS ="<< e->getNbrParents() );
 //           for ( int j=0 ; j < e->getNbrParents(); ++j ){
 //               next_q = e->getParent(j);
@@ -701,7 +701,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 //       }
 // 
 //       //setting quad way
-//       HEXA_NS::Edge* e0 = q->getEdge(0);
+//       HEXA_NS::Edge* e0 = q->getUsedEdge(0);
 //       HEXA_NS::Vertex* e0_0 = e0->getVertex(0);
 // 
 //       if (  e0_0 == localEdgeWays[ e0 ].first ){
@@ -1124,11 +1124,11 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
 
   // A) Vertex computation
   
-  int nVertex = doc->countVertex();
+  int nVertex = doc->countUsedVertex();
   HEXA_NS::Vertex* vertex = NULL;
 
   for (int j=0; j <nVertex; ++j ){ //Computing each vertex of the document
-    vertex = doc->getVertex(j);
+    vertex = doc->getUsedVertex(j);
     ok = computeVertex(*vertex);
   }
 
@@ -1155,10 +1155,10 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
   }
   // C) Quad computation
   std::map<HEXA_NS::Quad*, bool>  quadWays = computeQuadWays(doc);
-  int nQuad = doc->countQuad();
+  int nQuad = doc->countUsedQuad();
   HEXA_NS::Quad* q = NULL;
   for (int j=0; j <nQuad; ++j ){ //Computing each quad of the document
-    q = doc->getQuad(j);
+    q = doc->getUsedQuad(j);
     int id = q->getId();
     if ( quadWays.count(q) > 0 )
       ok = computeQuad( *q, quadWays[q] );
@@ -1178,10 +1178,10 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
 void SMESH_HexaBlocks::buildGroups(HEXA_NS::Document* doc)
 {
   MESSAGE("_addGroups() : : begin   <<<<<<");
-  MESSAGE("_addGroups() : : nb. hexas= " << doc->countHexa());
-  MESSAGE("_addGroups() : : nb. quads= " << doc->countQuad());
-  MESSAGE("_addGroups() : : nb. edges= " << doc->countEdge());
-  MESSAGE("_addGroups() : : nb. nodes= " << doc->countVertex());
+  MESSAGE("_addGroups() : : nb. hexas= " << doc->countUsedHexa());
+  MESSAGE("_addGroups() : : nb. quads= " << doc->countUsedQuad());
+  MESSAGE("_addGroups() : : nb. edges= " << doc->countUsedEdge());
+  MESSAGE("_addGroups() : : nb. nodes= " << doc->countUsedVertex());
 
   // Looping on each groups of the document
   for ( int i=0; i < doc->countGroup(); i++ ){
@@ -1887,7 +1887,7 @@ void SMESH_HexaBlocks::_getCurve( const std::vector<HEXA_NS::Shape*>& shapesIn,
 // //   if ( assoc != NULL ){
 // //     MESSAGE("_computeQuadWay with assoc");
 //   for( int i=0; i < h->countEdge(); ++i  ){ 
-//     HEXA_NS::Edge* e = h->getEdge(i);
+//     HEXA_NS::Edge* e = h->getUsedEdge(i);
 //     if ( e->definedBy(v1,v2) ){
 //       const std::vector <HEXA_NS::Shape*> assocs = e->getAssociations();
 //       if ( assocs.size() != 0 ){
