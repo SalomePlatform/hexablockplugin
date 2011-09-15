@@ -92,37 +92,6 @@ namespace
 
   //================================================================================
   /*!
-   * \brief Description of node used to detect corner nodes
-   */
-  struct _NodeDescriptor
-  {
-    int nbInverseFaces, nbNodesInInverseFaces;
-
-    _NodeDescriptor(const SMDS_MeshNode* n): nbInverseFaces(0), nbNodesInInverseFaces(0)
-    {
-      if ( n )
-      {
-        set<const SMDS_MeshNode*> nodes;
-        SMDS_ElemIteratorPtr fIt = n->GetInverseElementIterator(SMDSAbs_Face );
-        while ( fIt->more() )
-        {
-          const SMDS_MeshElement* face = fIt->next();
-          nodes.insert( face->begin_nodes(), face->end_nodes() );
-          nbInverseFaces++;
-        }
-        nbNodesInInverseFaces = nodes.size();
-      }
-    }
-    bool operator==(const _NodeDescriptor& other) const
-    {
-      return
-        nbInverseFaces == other.nbInverseFaces &&
-        nbNodesInInverseFaces == other.nbNodesInInverseFaces;
-    }
-  };
-
-  //================================================================================
-  /*!
    * \brief return true if a node is at block corner
    *
    * This check is valid for simple cases only
@@ -131,7 +100,19 @@ namespace
 
   bool isCornerNode( const SMDS_MeshNode* n )
   {
-    return n && n->NbInverseElements( SMDSAbs_Face ) % 2;
+    int nbF = n ? n->NbInverseElements( SMDSAbs_Face ) : 1;
+    if ( nbF % 2 )
+      return true;
+
+    set<const SMDS_MeshNode*> nodesInInverseFaces;
+    SMDS_ElemIteratorPtr fIt = n->GetInverseElementIterator(SMDSAbs_Face );
+    while ( fIt->more() )
+    {
+      const SMDS_MeshElement* face = fIt->next();
+      nodesInInverseFaces.insert( face->begin_nodes(), face->end_nodes() );
+    }
+
+    return nodesInInverseFaces.size() != ( 6 + (nbF/2-1)*3 );
   }
 
   //================================================================================
@@ -854,14 +835,12 @@ namespace
       row2.push_back( n1 = oppositeNode( quad, i1 ));
     }
 
-    _NodeDescriptor nDesc( row1[1] );
-    if ( nDesc == _NodeDescriptor( row1[0] ))
-      return true; // row of 2 nodes
+    if ( isCornerNode( row1[1] ))
+      return true;
 
     // Find the rest nodes
     TIDSortedElemSet emptySet, avoidSet;
-    //while ( !isCornerNode( n2 ))
-    while ( nDesc == _NodeDescriptor( n2 ))
+    while ( !isCornerNode( n2 ) )
     {
       avoidSet.clear(); avoidSet.insert( quad );
       quad = SMESH_MeshEditor::FindFaceInSet( n1, n2, emptySet, avoidSet, &i1, &i2 );
