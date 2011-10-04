@@ -1677,29 +1677,28 @@ SMESH_Group* SMESH_HexaBlocks::_createGroup(HEXA_NS::Group& grHex)
 
 void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
 {
-  MESSAGE("_fillGroup() : : begin   <<<<<<");
+  if(MYDEBUG) MESSAGE("_fillGroup() : : begin   <<<<<<");
 
   SMESH_Group* aGr = _createGroup( *grHex );
   HEXA_NS::EltBase*  grHexElt   = NULL;
   HEXA_NS::EnumGroup grHexKind  = grHex->getKind();
   int                grHexNbElt = grHex->countElement();
 
-  MESSAGE("_fillGroup() : kind = " << grHexKind);
-  MESSAGE("_fillGroup() : count= " << grHexNbElt);
-
-  MESSAGE("_fillGroup() : : end   <<<<<<");
-  return; // FKL TO DO
+  if(MYDEBUG) MESSAGE("_fillGroup() : kind = " << grHexKind);
+  if(MYDEBUG) MESSAGE("_fillGroup() : count= " << grHexNbElt);
 
   // A)Looking for elements ID
   std::vector<const SMDS_MeshElement*> aGrEltIDs;
 
   for ( int n=0; n<grHexNbElt; ++n ){
       grHexElt = grHex->getElement(n);
+
       switch ( grHexKind ){
         case HEXA_NS::HexaCell:
         {
-            HEXA_NS::Hexa* h = dynamic_cast<HEXA_NS::Hexa*>(grHexElt);
-            ASSERT(h);
+            HEXA_NS::Hexa* h = reinterpret_cast<HEXA_NS::Hexa*>(grHexElt);
+//             HEXA_NS::Hexa* h = dynamic_cast<HEXA_NS::Hexa*>(grHexElt);
+//             ASSERT(h);
             if ( _volumesOnHexa.count(h)>0 ){
               SMESHVolumes volumes = _volumesOnHexa[h];
               for ( SMESHVolumes::iterator aVolume = volumes.begin(); aVolume != volumes.end(); ++aVolume ){
@@ -1712,8 +1711,9 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         break;
         case HEXA_NS::QuadCell:
         {
-            HEXA_NS::Quad* q = dynamic_cast<HEXA_NS::Quad*>(grHexElt);
-            ASSERT(q);
+            HEXA_NS::Quad* q = reinterpret_cast<HEXA_NS::Quad*>(grHexElt);
+//             HEXA_NS::Quad* q = dynamic_cast<HEXA_NS::Quad*>(grHexElt);
+//             ASSERT(q);
             if ( _facesOnQuad.count(q)>0 ){
               SMESHFaces faces = _facesOnQuad[q];
               for ( SMESHFaces::iterator aFace = faces.begin(); aFace != faces.end(); ++aFace ){
@@ -1726,8 +1726,9 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         break;
         case HEXA_NS::EdgeCell:
         {
-            HEXA_NS::Edge* e = dynamic_cast<HEXA_NS::Edge*>(grHexElt);
-            ASSERT(e);
+            HEXA_NS::Edge* e = reinterpret_cast<HEXA_NS::Edge*>(grHexElt);
+//             HEXA_NS::Edge* e = dynamic_cast<HEXA_NS::Edge*>(grHexElt);
+//             ASSERT(e);
             if ( _edgesOnEdge.count(e)>0 ){
               SMESHEdges edges = _edgesOnEdge[e];
               for ( SMESHEdges::iterator anEdge = edges.begin(); anEdge != edges.end(); ++anEdge ){
@@ -1740,8 +1741,9 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         break;
         case HEXA_NS::HexaNode: 
         {
-            HEXA_NS::Hexa* h = dynamic_cast<HEXA_NS::Hexa*>(grHexElt);
-            ASSERT(h);
+            HEXA_NS::Hexa* h = reinterpret_cast<HEXA_NS::Hexa*>(grHexElt);
+//             HEXA_NS::Hexa* h = dynamic_cast<HEXA_NS::Hexa*>(grHexElt);
+//             ASSERT(h);
             if ( _volumesOnHexa.count(h)>0 ){
               SMESHVolumes volumes = _volumesOnHexa[h];
               for ( SMESHVolumes::iterator aVolume = volumes.begin(); aVolume != volumes.end(); ++aVolume ){
@@ -1761,8 +1763,9 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         break;
         case HEXA_NS::QuadNode:
         {
-            HEXA_NS::Quad* q = dynamic_cast<HEXA_NS::Quad*>(grHexElt);
-            ASSERT(q);
+            HEXA_NS::Quad* q = reinterpret_cast<HEXA_NS::Quad*>(grHexElt);
+//             HEXA_NS::Quad* q = dynamic_cast<HEXA_NS::Quad*>(grHexElt);
+//             ASSERT(q);
             if ( _quadNodes.count(q)>0 ){
               ArrayOfSMESHNodes nodesOnQuad = _quadNodes[q];
               for ( ArrayOfSMESHNodes::iterator nodes = nodesOnQuad.begin(); nodes != nodesOnQuad.end(); ++nodes){
@@ -1777,8 +1780,9 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         break;
         case HEXA_NS::EdgeNode:
         {
-            HEXA_NS::Edge* e = dynamic_cast<HEXA_NS::Edge*>(grHexElt);
-            ASSERT(e);
+            HEXA_NS::Edge* e = reinterpret_cast<HEXA_NS::Edge*>(grHexElt);
+//             HEXA_NS::Edge* e = dynamic_cast<HEXA_NS::Edge*>(grHexElt);
+//             ASSERT(e);
             if ( _nodesOnEdge.count(e)>0 ){
               SMESHNodes nodes = _nodesOnEdge[e];
               for ( SMESHNodes::iterator aNode = nodes.begin(); aNode != nodes.end(); ++aNode){
@@ -1791,8 +1795,9 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         break;
         case HEXA_NS::Vertex_Node:
         {
-            HEXA_NS::Vertex* v = dynamic_cast<HEXA_NS::Vertex*>(grHexElt);
-            ASSERT(v);
+          HEXA_NS::Vertex* v = reinterpret_cast<HEXA_NS::Vertex*>(grHexElt);
+//             HEXA_NS::Vertex* v = dynamic_cast<HEXA_NS::Vertex*>(grHexElt);
+//             ASSERT(v);
             if ( _node.count(v)>0 ){
               aGrEltIDs.push_back(_node[v]);
             } else {
