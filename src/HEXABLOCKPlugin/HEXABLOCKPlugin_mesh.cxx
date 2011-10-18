@@ -62,7 +62,7 @@
 #include "HexHexa.hxx"
 #include "HexPropagation.hxx"
 #include "HexShape.hxx"
-#include "HexGroups.hxx"
+#include "HexGroup.hxx"
 
 // HEXABLOCKPLUGIN includes
 #include "HEXABLOCKPlugin_mesh.hxx"
@@ -89,9 +89,9 @@
 #endif
 
 #ifdef _DEBUG_
-static int MYDEBUG = 0;
+static int MYDEBUG = 1;
 #else
-static int MYDEBUG = 0;
+static int MYDEBUG = 1;
 #endif
 
 
@@ -1337,9 +1337,9 @@ void SMESH_HexaBlocks::_buildMyCurve(
                     myCurve_way = false;
                     myCurve_ways[theCurve] = false;
                 } else {
-                    if(MYDEBUG) MESSAGE("SOMETHING WRONG on edge association... bad script?");
+                    if(MYDEBUG) MESSAGE("SOMETHING WRONG on edge association... Bad script?");
 //                     ASSERT(false);
-                    throw (SALOME_Exception(LOCALIZED("edge association : check association parameters ( first, last ) between HEXA model and CAO")));
+                    throw (SALOME_Exception(LOCALIZED("Edge association : check association parameters ( first, last ) between HEXA model and CAO")));
                 }
 
             } else {
@@ -1356,7 +1356,7 @@ void SMESH_HexaBlocks::_buildMyCurve(
                 } else {
                     if(MYDEBUG) MESSAGE("SOMETHING WRONG on edge association... bad script?");
 //                     ASSERT(false);
-                    throw (SALOME_Exception(LOCALIZED("edge association : check association parameters ( first, last ) between HEXA model and CAO")));
+                    throw (SALOME_Exception(LOCALIZED("Edge association : Check association parameters ( first, last ) between HEXA model and CAO")));
                 }
             }
 
@@ -1664,7 +1664,7 @@ SMESH_Group* SMESH_HexaBlocks::_createGroup(HEXA_NS::Group& grHex)
     case HEXA_NS::HexaNode   : aGrType = SMDSAbs_Node  ; break;
     case HEXA_NS::QuadNode   : aGrType = SMDSAbs_Node  ; break;
     case HEXA_NS::EdgeNode   : aGrType = SMDSAbs_Node  ; break;
-    case HEXA_NS::Vertex_Node: aGrType = SMDSAbs_Node  ; break;
+    case HEXA_NS::VertexNode : aGrType = SMDSAbs_Node  ; break;
     default : ASSERT(false);
   }
 
@@ -1793,7 +1793,7 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
             }
         }
         break;
-        case HEXA_NS::Vertex_Node:
+        case HEXA_NS::VertexNode:
         {
           HEXA_NS::Vertex* v = reinterpret_cast<HEXA_NS::Vertex*>(grHexElt);
 //             HEXA_NS::Vertex* v = dynamic_cast<HEXA_NS::Vertex*>(grHexElt);
