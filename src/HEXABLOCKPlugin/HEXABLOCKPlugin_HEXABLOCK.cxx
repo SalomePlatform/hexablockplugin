@@ -28,6 +28,8 @@
 #include "HEXABLOCKPlugin_HEXABLOCK.hxx"
 #include "HEXABLOCKPlugin_Hypothesis.hxx"
 
+#include "TopExp_Explorer.hxx"
+
 #include <Basics_Utils.hxx>
 
 #include "SMESH_Gen.hxx"
@@ -62,9 +64,10 @@ HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK(int hypId, int studyId, SME
   _compatibleHypothesis.push_back("HEXABLOCK_Parameters");
   _requireShape = false; // can work without shape
   _requireDescretBoundary = false;
-  _onlyUnaryInput = false; // Compute() will be called on a compound of solids
   _hyp = NULL;
   _supportSubmeshes = false;
+  _iShape  = 0;
+  _nbShape = 0;
 }
 
 //=============================================================================
@@ -105,16 +108,37 @@ bool HEXABLOCKPlugin_HEXABLOCK::CheckHypothesis ( SMESH_Mesh& aMesh,
  */
 //=============================================================================
 
-bool HEXABLOCKPlugin_HEXABLOCK::Compute(SMESH_Mesh& theMesh,
-                                const TopoDS_Shape& theShape)
-{
+bool HEXABLOCKPlugin_HEXABLOCK::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& theShape) {
   MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute with a shape");
 
-  switch (_hyp->GetDimension()) {
-    case 0 : return( Compute0D(theMesh) );
-    case 1 : return( Compute1D(theMesh) );
-    case 2 : return( Compute2D(theMesh) );
-    default: return( Compute3D(theMesh) );
+  SMESHDS_Mesh* meshDS = theMesh.GetMeshDS();
+  if ( (_iShape == 0) && (_nbShape == 0) ) {
+    TopExp_Explorer expShape ( meshDS->ShapeToMesh(), TopAbs_SOLID );
+    for ( ; expShape.More(); expShape.Next() ) {
+      _nbShape++;
+    }
+    _tabNode = new SMDS_MeshNode*[_nbShape];
+  }
+
+  _tabNode[_iShape] = meshDS->AddNode(0, 0, 0);
+  meshDS->NewSubMesh( meshDS->ShapeToIndex(theShape))->AddElement( _tabNode[_iShape] );
+
+  _iShape++;
+
+  if ( _iShape == _nbShape ) {
+    for (int i=0; i<_nbShape; i++) {
+      meshDS->RemoveNode( _tabNode[i] );
+    }
+    delete [] _tabNode;
+    _nbShape = 0;
+    _iShape  = 0;
+
+    switch (_hyp->GetDimension()) {
+      case 0 : return( Compute0D(theMesh) );
+      case 1 : return( Compute1D(theMesh) );
+      case 2 : return( Compute2D(theMesh) );
+      default: return( Compute3D(theMesh) );
+    };
   }
 }
 
