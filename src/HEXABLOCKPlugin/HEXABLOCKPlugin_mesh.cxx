@@ -178,8 +178,8 @@ bool SMESH_HexaBlocks::computeVertexByAssoc(HEXA_NS::Vertex& vx)
   HEXA_NS::Shape* assoc = vx.getAssociation();
   if ( assoc == NULL ){
     if (MYDEBUG){
-      MESSAGE("computeVertexByAssoc() : ASSOC not found ");
-      vx.printName();
+      MESSAGE("computeVertexByAssoc() : ASSOC not found " << vx.getName ());
+      // vx.printName();
     }
     return false;
   }
@@ -195,8 +195,8 @@ bool SMESH_HexaBlocks::computeVertexByAssoc(HEXA_NS::Vertex& vx)
   _vertex[newNode] = &vx;
 
   if (MYDEBUG){
-    MESSAGE("computeVertexByAssoc() : ASSOC found ");
-    vx.printName();
+    MESSAGE("computeVertexByAssoc() : ASSOC found " << vx.getName());
+    /// vx.printName();
     MESSAGE("( "<< x <<","<< y <<","<< z <<" )");
   }
 
@@ -224,8 +224,8 @@ bool SMESH_HexaBlocks::computeVertexByModel(HEXA_NS::Vertex& vx)
   _node[&vx] = newNode;//needed in computeEdge()
   _vertex[newNode] = &vx;
   if (MYDEBUG){
-    MESSAGE("computeVertexByModel() :");
-    vx.printName();
+    MESSAGE("computeVertexByModel() :" << vx.getName());
+    /// vx.printName();
     MESSAGE("( "<< x <<","<< y <<","<< z <<" )");
   }
 
@@ -1513,8 +1513,19 @@ TopoDS_Shape SMESH_HexaBlocks::_getShapeOrCompound( const std::vector<HEXA_NS::S
 }
 
 
-
-
+// ================================================== carre
+inline double carre (double val)
+{
+  return val*val;
+}
+// ================================================== dist2
+inline double dist2 (const gp_Pnt& pt1, const gp_Pnt& pt2)
+{
+   double dist = carre (pt2.X()-pt1.X()) + carre (pt2.Y()-pt1.Y()) 
+                                         + carre (pt2.Z()-pt1.Z());
+   return dist;
+}
+// ================================================== _intersect
 gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
                                      const gp_Vec& u, const gp_Vec& v,
                                      const TopoDS_Shape& shape,
@@ -1526,7 +1537,6 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
   gp_Dir dir(normale);
   gp_Lin li( Pt, dir );
 
-
   Standard_Real s = -Precision::Infinite();
   Standard_Real e = +Precision::Infinite();
 
@@ -1535,8 +1545,26 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
 //   inter.Load(S, tol);
   inter.Perform(li, s, e);//inter.PerformNearest(li, s, e);
 
-  if ( inter.IsDone() && (inter.NbPnt()==1) ) {
-    result = inter.Pnt(1);//first
+/**************************************************************  Abu 2011-11-04 */
+  /// if ( inter.IsDone() && (inter.NbPnt()==1) ) {
+  if ( inter.IsDone() )
+     {
+     result = inter.Pnt(1);//first
+     int nbrpts = inter.NbPnt();
+     if (nbrpts>1)
+        {
+        double d0 = dist2 (result, Pt);
+        for (int i=2; i <= inter.NbPnt(); ++i )
+            {
+            double d1 = dist2 (Pt, inter.Pnt(i));
+            if (d1<d0)
+               {
+               d0 = d1;
+               result = inter.Pnt (i);
+               }
+            }
+        }
+/**************************************************************  Abu 2011-11-04 (fin) */
     if (MYDEBUG){
       MESSAGE("_intersect() : OK");
       for ( int i=1; i <= inter.NbPnt(); ++i ){
