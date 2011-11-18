@@ -140,7 +140,8 @@ private:
       double& 				        myCurve_length, //INOUT
       std::map< BRepAdaptor_Curve*, double>& 	myCurve_lengths,//INOUT
       std::map< BRepAdaptor_Curve*, bool>& 	myCurve_ways,   //INOUT
-      std::map< BRepAdaptor_Curve*, double>&    myCurve_starts ); //INOUT
+      std::map< BRepAdaptor_Curve*, double>&    myCurve_starts,   //INOUT
+      HEXA_NS::Edge&                            edge);  // For diagnostic
 
   gp_Pnt _getPtOnMyCurve( 
       const double&                           myCurve_u,      //IN

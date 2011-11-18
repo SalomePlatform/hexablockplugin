@@ -306,7 +306,8 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
       myCurve_length,
       myCurve_lengths,
       myCurve_ways,
-      myCurve_starts
+      myCurve_starts,
+      edge
   );
 
 
@@ -1256,7 +1257,8 @@ void SMESH_HexaBlocks::_buildMyCurve(
     double& 				        myCurve_length, //INOUT
     std::map< BRepAdaptor_Curve*, double>& 	myCurve_lengths,//INOUT
     std::map< BRepAdaptor_Curve*, bool>& 	myCurve_ways,   //INOUT
-    std::map< BRepAdaptor_Curve*, double>&      myCurve_starts )  //INOUT
+    std::map< BRepAdaptor_Curve*, double>&      myCurve_starts,   //INOUT
+    HEXA_NS::Edge& 	                        edge) // For error diagnostic
 {
     if(MYDEBUG) MESSAGE("_buildMyCurve() : : begin   <<<<<<");
     bool myCurve_way  = true;
@@ -1339,6 +1341,7 @@ void SMESH_HexaBlocks::_buildMyCurve(
                 } else {
                     if(MYDEBUG) MESSAGE("SOMETHING WRONG on edge association... Bad script?");
 //                     ASSERT(false);
+                    edge.dumpAsso();
                     throw (SALOME_Exception(LOCALIZED("Edge association : check association parameters ( first, last ) between HEXA model and CAO")));
                 }
 
