@@ -91,7 +91,7 @@
 #ifdef _DEBUG_
 static int MYDEBUG = 1;
 #else
-static int MYDEBUG = 1;
+static int MYDEBUG = 0;
 #endif
 
 
@@ -190,7 +190,7 @@ bool SMESH_HexaBlocks::computeVertexByAssoc(HEXA_NS::Vertex& vx)
 //   ASSERT(ok);
   if (!ok) throw (SALOME_Exception(LOCALIZED("vertex association : shape2coord() error ")));
   newNode = _theMeshDS->AddNode(x, y, z);
-  if  (_node.count(&vx) >= 1 ) MESSAGE("_node : ALREADY");
+  if  (_node.count(&vx) >= 1  and MYDEBUG) MESSAGE("_node : ALREADY");
   _node[&vx] = newNode;//needed in computeEdge()
   _vertex[newNode] = &vx;
 
@@ -220,7 +220,7 @@ bool SMESH_HexaBlocks::computeVertexByModel(HEXA_NS::Vertex& vx)
 
   newNode = _theMeshDS->AddNode(x, y, z);
 
-  if  (_node.count(&vx) >= 1 ) MESSAGE("_node : ALREADY");
+  if  (_node.count(&vx) >= 1 and MYDEBUG) MESSAGE("_node : ALREADY");
   _node[&vx] = newNode;//needed in computeEdge()
   _vertex[newNode] = &vx;
   if (MYDEBUG){
@@ -969,7 +969,7 @@ bool SMESH_HexaBlocks::_computeQuadInit(
     }
   }
   if ( S1 != nodesOnQuad[0][0] ){
-    MESSAGE("ZZZZZZZZZZZZZZZZ quadID = "<<quad.getId());
+    if(MYDEBUG) MESSAGE("ZZZZZZZZZZZZZZZZ quadID = "<<quad.getId());
   }
 //   ASSERT( S1 == nodesOnQuad[0][0] );
 
@@ -978,7 +978,7 @@ bool SMESH_HexaBlocks::_computeQuadInit(
   for (j = 0, _j = gNodes.size()-1; j < gNodes.size(); ++j, --_j){
     nodesOnQuad[0][j] = gNodes[*g_j];
     if ( S1 != nodesOnQuad[0][0] ){
-      MESSAGE("XXXXXXXXXXXXXXXX quadID = "<<quad.getId());
+      if(MYDEBUG) MESSAGE("XXXXXXXXXXXXXXXX quadID = "<<quad.getId());
     }
 //     ASSERT( S1 == nodesOnQuad[0][0] );
     nodesOnQuad[bNodes.size()-1][j] = dNodes[*d_j];
@@ -1178,18 +1178,19 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
 
 void SMESH_HexaBlocks::buildGroups(HEXA_NS::Document* doc)
 {
-  MESSAGE("_addGroups() : : begin   <<<<<<");
-  MESSAGE("_addGroups() : : nb. hexas= " << doc->countUsedHexa());
-  MESSAGE("_addGroups() : : nb. quads= " << doc->countUsedQuad());
-  MESSAGE("_addGroups() : : nb. edges= " << doc->countUsedEdge());
-  MESSAGE("_addGroups() : : nb. nodes= " << doc->countUsedVertex());
-
+  if (MYDEBUG){
+    MESSAGE("_addGroups() : : begin   <<<<<<");
+    MESSAGE("_addGroups() : : nb. hexas= " << doc->countUsedHexa());
+    MESSAGE("_addGroups() : : nb. quads= " << doc->countUsedQuad());
+    MESSAGE("_addGroups() : : nb. edges= " << doc->countUsedEdge());
+    MESSAGE("_addGroups() : : nb. nodes= " << doc->countUsedVertex());
+  }
   // Looping on each groups of the document
   for ( int i=0; i < doc->countGroup(); i++ ){
       _fillGroup( doc->getGroup(i) );
   };
 
-  MESSAGE("_addGroups() : end  >>>>>>>>");
+  if(MYDEBUG) MESSAGE("_addGroups() : end  >>>>>>>>");
 }
 
 // --------------------------------------------------------------

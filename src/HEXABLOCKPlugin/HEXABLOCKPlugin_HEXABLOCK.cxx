@@ -47,7 +47,11 @@
 
 using namespace std;
 
+#ifdef _DEBUG_
+static int MYDEBUG = 1;
+#else
 static int MYDEBUG = 0;
+#endif
 
 //=============================================================================
 /*!
@@ -58,7 +62,7 @@ static int MYDEBUG = 0;
 HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK(int hypId, int studyId, SMESH_Gen* gen)
   : SMESH_3D_Algo(hypId, studyId, gen)
 {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK");
   _name = "HEXABLOCK_3D";
   _shapeType = (1 << TopAbs_SHELL) | (1 << TopAbs_SOLID);// 1 bit /shape type
   _compatibleHypothesis.push_back("HEXABLOCK_Parameters");
@@ -78,7 +82,7 @@ HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK(int hypId, int studyId, SME
 
 HEXABLOCKPlugin_HEXABLOCK::~HEXABLOCKPlugin_HEXABLOCK()
 {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::~HEXABLOCKPlugin_HEXABLOCK");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::~HEXABLOCKPlugin_HEXABLOCK");
 }
 
 //=============================================================================
@@ -109,7 +113,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::CheckHypothesis ( SMESH_Mesh& aMesh,
 //=============================================================================
 
 bool HEXABLOCKPlugin_HEXABLOCK::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& theShape) {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute with a shape");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute with a shape");
 
   SMESHDS_Mesh* meshDS = theMesh.GetMeshDS();
   if ( (_iShape == 0) && (_nbShape == 0) ) {
@@ -151,7 +155,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape&
 bool HEXABLOCKPlugin_HEXABLOCK::Compute(SMESH_Mesh& theMesh,
                                 SMESH_MesherHelper* aHelper)
 {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute without a shape");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute without a shape");
 
   switch (_hyp->GetDimension()) {
     case 0 : return( Compute0D(theMesh) );
@@ -170,7 +174,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::Evaluate(SMESH_Mesh& aMesh,
                                  const TopoDS_Shape& aShape,
                                  MapShapeNbElems& aResMap)
 {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Evaluate: do nothing");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Evaluate: do nothing");
 
   return true;
 }
@@ -182,14 +186,15 @@ bool HEXABLOCKPlugin_HEXABLOCK::Evaluate(SMESH_Mesh& aMesh,
 //=============================================================================
 
 bool HEXABLOCKPlugin_HEXABLOCK::Compute3D(SMESH_Mesh& theMesh) {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 3D");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 3D Begin");
 
   SMESH_HexaBlocks hexaBuilder(theMesh);
 
   HEXA_NS::Document* doc = _hyp->GetDocument();
   hexaBuilder.computeDoc(doc);
-  hexaBuilder.buildGroups(doc);
+  hexaBuilder.buildGroups(doc); 
 
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 3D End");
   return true;
 }
 
@@ -201,7 +206,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute3D(SMESH_Mesh& theMesh) {
 
 bool HEXABLOCKPlugin_HEXABLOCK::Compute2D(SMESH_Mesh& theMesh)
 {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 2D");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 2D");
 
   HEXA_NS::Document* doc = _hyp->GetDocument();
   SMESH_HexaBlocks hexaBuilder(theMesh);
@@ -322,7 +327,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute2D(SMESH_Mesh& theMesh)
 
 bool HEXABLOCKPlugin_HEXABLOCK::Compute1D(SMESH_Mesh& theMesh)
 {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 1D");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 1D");
 
   HEXA_NS::Document* doc = _hyp->GetDocument();
   SMESH_HexaBlocks hexaBuilder(theMesh);
@@ -363,7 +368,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute1D(SMESH_Mesh& theMesh)
 
 bool HEXABLOCKPlugin_HEXABLOCK::Compute0D(SMESH_Mesh& theMesh)
 {
-  MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 0D");
+  if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 0D");
 
   HEXA_NS::Document* doc = _hyp->GetDocument();
   SMESH_HexaBlocks hexaBuilder(theMesh);

@@ -49,7 +49,7 @@
 #ifdef _DEBUG_
 static int MYDEBUG = 1;
 #else
-static int MYDEBUG = 1;
+static int MYDEBUG = 0;
 #endif
 
 
@@ -984,14 +984,14 @@ SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D(int hypId, int studyId, SMESH_Gen* 
   :SMESH_3D_Algo(hypId, studyId, gen),
   _doc( doc )
 {
-  MESSAGE("SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D");
+  if(MYDEBUG) MESSAGE("SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D");
   _name = "HexaFromSkin_3D";
 }
 
 
 SMESH_HexaFromSkin_3D::~SMESH_HexaFromSkin_3D()
 {
-  MESSAGE("SMESH_HexaFromSkin_3D::~SMESH_HexaFromSkin_3D");
+  if(MYDEBUG) MESSAGE("SMESH_HexaFromSkin_3D::~SMESH_HexaFromSkin_3D");
 }
 
 //================================================================================
