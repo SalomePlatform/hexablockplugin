@@ -67,7 +67,7 @@ HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK(int hypId, int studyId, SME
   _shapeType = (1 << TopAbs_SHELL) | (1 << TopAbs_SOLID);// 1 bit /shape type
   _compatibleHypothesis.push_back("HEXABLOCK_Parameters");
   _requireShape = false; // can work without shape
-  _requireDescretBoundary = false;
+  _requireDiscreteBoundary = false;
   _hyp = NULL;
   _supportSubmeshes = false;
   _iShape  = 0;
