@@ -95,7 +95,7 @@ static int MYDEBUG = 0;
 #endif
 
 
-static double HEXA_EPSILON = 1E-6; //1E-3; 
+static double HEXA_EPSILON = 1E-3; //1E-3; 
 static double HEXA_QUAD_WAY = PI/4.; //3.*PI/8.;
 // static double HEXA_QUAD_WAY2 = 499999999.*PI/1000000000.;
 
