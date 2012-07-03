@@ -61,7 +61,6 @@ private:
   const HEXABLOCKPlugin_Hypothesis* _hyp;
   int  _iShape;
   int  _nbShape;
-  SMDS_MeshNode** _tabNode;
 };
 
 #endif

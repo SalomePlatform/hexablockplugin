@@ -121,19 +121,26 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape&
     for ( ; expShape.More(); expShape.Next() ) {
       _nbShape++;
     }
-    _tabNode = new SMDS_MeshNode*[_nbShape];
   }
 
-  _tabNode[_iShape] = meshDS->AddNode(0, 0, 0);
-  meshDS->NewSubMesh( meshDS->ShapeToIndex(theShape))->AddElement( _tabNode[_iShape] );
+  // to prevent from displaying error message after computing,
+  for ( int i = 0; i < _nbShape; ++i )
+    if ( SMESH_subMesh* sm = theMesh.GetSubMeshContaining( theShape ))
+    {
+      SMESH_subMeshIteratorPtr smIt = sm->getDependsOnIterator(/*includeSelf=*/true,
+                                                               /*complexShapeFirst=*/false);
+      while ( smIt->more() )
+      {
+        sm = smIt->next();
+        if ( !sm->IsMeshComputed() )
+          sm->SetIsAlwaysComputed( true );
+      }
+    }
+
 
   _iShape++;
 
   if ( _iShape == _nbShape ) {
-    for (int i=0; i<_nbShape; i++) {
-      meshDS->RemoveNode( _tabNode[i] );
-    }
-    delete [] _tabNode;
     _nbShape = 0;
     _iShape  = 0;
 
@@ -191,6 +198,8 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute3D(SMESH_Mesh& theMesh) {
   SMESH_HexaBlocks hexaBuilder(theMesh);
 
   HEXA_NS::Document* doc = _hyp->GetDocument();
+  // doc->reorderFaces ();                 // 0) Abu 06/03/2012
+
   hexaBuilder.computeDoc(doc);
   hexaBuilder.buildGroups(doc); 
 
@@ -209,6 +218,8 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute2D(SMESH_Mesh& theMesh)
   if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 2D");
 
   HEXA_NS::Document* doc = _hyp->GetDocument();
+  // doc->reorderFaces ();                 // 0) Abu 06/03/2012
+
   SMESH_HexaBlocks hexaBuilder(theMesh);
 
   // A) Vertex computation
@@ -330,6 +341,8 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute1D(SMESH_Mesh& theMesh)
   if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 1D");
 
   HEXA_NS::Document* doc = _hyp->GetDocument();
+  // doc->reorderFaces ();                 // 0) Abu 06/03/2012
+
   SMESH_HexaBlocks hexaBuilder(theMesh);
 
   // A) Vertex computation
@@ -371,6 +384,8 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute0D(SMESH_Mesh& theMesh)
   if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::Compute 0D");
 
   HEXA_NS::Document* doc = _hyp->GetDocument();
+  // doc->reorderFaces ();                 // 0) Abu 06/03/2012
+
   SMESH_HexaBlocks hexaBuilder(theMesh);
 
   // A) Vertex computation
