@@ -1274,6 +1274,8 @@ void SMESH_HexaBlocks::_buildMyCurve(
           assoc != associations.end();
           ++assoc ){
         string        theBrep  = (*assoc)->getBrep();
+        double        ass_debut = std::min ((*assoc)->debut, (*assoc)->fin);
+        double        ass_fin   = std::max ((*assoc)->debut, (*assoc)->fin);
         TopoDS_Shape  theShape = string2shape( theBrep );
         TopoDS_Edge   theEdge  = TopoDS::Edge( theShape );
         double        theCurve_length = _edgeLength( theEdge );
@@ -1285,18 +1287,18 @@ void SMESH_HexaBlocks::_buildMyCurve(
             Handle(Geom_Curve) testCurve = BRep_Tool::Curve(theEdge, f, l);
             theCurve = new BRepAdaptor_Curve( theEdge );
 
-            GCPnts_AbscissaPoint discret_start(*theCurve, theCurve_length*(*assoc)->debut, theCurve->FirstParameter() );
-            GCPnts_AbscissaPoint discret_end(*theCurve, theCurve_length*(*assoc)->fin, theCurve->FirstParameter() );
+            GCPnts_AbscissaPoint discret_start (*theCurve, 
+                                                 theCurve_length*ass_debut, 
+                                                 theCurve->FirstParameter() );
+            GCPnts_AbscissaPoint discret_end (*theCurve, 
+                                               theCurve_length*ass_fin, 
+                                               theCurve->FirstParameter() );
             double u_start = discret_start.Parameter();
             double u_end   = discret_end.Parameter();
             ASSERT( discret_start.IsDone() && discret_end.IsDone() );
             theCurve_start  = theCurve->Value( u_start);
             theCurve_end    = theCurve->Value( u_end );
-//             double u_start = (l-f)*(*assoc)->debut;
-//             double u_end   = (l-f)*(*assoc)->fin;
-//             theCurve_start  = theCurve->Value( (l-f)*(*assoc)->debut );
-//             theCurve_end    = theCurve->Value( (l-f)*(*assoc)->fin );
-            theCurve_length = theCurve_length*( (*assoc)->fin - (*assoc)->debut );
+            theCurve_length = theCurve_length*( ass_fin - ass_debut);
 
             if (MYDEBUG){
               MESSAGE("testCurve->f ->"<<f);
@@ -1307,8 +1309,8 @@ void SMESH_HexaBlocks::_buildMyCurve(
               MESSAGE("FirstParameter ->"<<theCurve->FirstParameter());
               MESSAGE("LastParameter  ->"<<theCurve->LastParameter());
               MESSAGE("theCurve_length ->"<<theCurve_length);
-              MESSAGE("(*assoc)->debut ->"<<(*assoc)->debut );
-              MESSAGE("(*assoc)->fin   ->"<<(*assoc)->fin );
+              MESSAGE("(*assoc)->debut ->"<< ass_debut );
+              MESSAGE("(*assoc)->fin   ->"<< ass_fin );
               MESSAGE("u_start ->"<<u_start);
               MESSAGE("u_end   ->"<<u_end);
               MESSAGE("myCurve_start( "<<myCurve_start.X()<<", "<<myCurve_start.Y()<<", "<<myCurve_start.Z()<<") ");
@@ -1318,10 +1320,6 @@ void SMESH_HexaBlocks::_buildMyCurve(
             }
 
             if ( thePreviousCurve == NULL ){ 
-                // working on first valid association: it can be the first or last curve.
-                // using myCurve_start and myCurve_end to check it out.
-                // gp_Pnt theCurve_start = theCurve->Value( f + theCurveLength*assoc->debut );
-
                 // setting myCurve_way and first curve way
                 if ( myCurve_start.IsEqual(theCurve_start, HEXA_EPSILON) ){
                     if(MYDEBUG) MESSAGE("myCurve_start.IsEqual(theCurve_start, HEXA_EPSILON)");
@@ -1414,12 +1412,19 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
   GCPnts_AbscissaPoint discret;
 
   if (MYDEBUG){
-    MESSAGE("looking for curve: myCurve_u    = "<<myCurve_u);
+    MESSAGE("looking for curve: c    = "<<myCurve_u);
     MESSAGE("looking for curve: curve_start  = "<<curve_start);
     MESSAGE("looking for curve: curve_end    = "<<curve_end);
     MESSAGE("looking for curve: curve_lenght = "<<myCurve_lengths[curve]);
+    MESSAGE("looking for curve: curve.size _lenght= "<<myCurve.size());
   }
   while ( not ( (myCurve_u >= curve_start) and  (myCurve_u <= curve_end) ) ) {
+    if (myCurve.size() == 0 )
+       {
+       PutData (myCurve.size());
+       PutData (myCurve_u);
+       }
+
     ASSERT( myCurve.size() != 0 );
     myCurve.pop_front();
     curve       = myCurve.front();
@@ -1427,8 +1432,9 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
     curve_end   = curve_start + myCurve_lengths[curve];
     if (MYDEBUG){
       MESSAGE("go next curve: curve_lenght = "<<myCurve_lengths[curve]);
-      MESSAGE("go next curve: curve_start = "<<curve_start);
-      MESSAGE("go next curve: curve_end   = "<<curve_end);
+      MESSAGE("go next curve: curve_start  = "<<curve_start);
+      MESSAGE("go next curve: curve_end    = "<<curve_end);
+      MESSAGE("go next curve: myCurve_u    = "<<myCurve_u);
     }
   }
   myCurve_start = curve_start;
