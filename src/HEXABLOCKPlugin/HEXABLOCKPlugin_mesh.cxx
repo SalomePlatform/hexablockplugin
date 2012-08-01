@@ -1419,11 +1419,11 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
     MESSAGE("looking for curve: curve.size _lenght= "<<myCurve.size());
   }
   while ( not ( (myCurve_u >= curve_start) and  (myCurve_u <= curve_end) ) ) {
-    if (myCurve.size() == 0 )
-       {
-       PutData (myCurve.size());
-       PutData (myCurve_u);
-       }
+    // if (myCurve.size() == 0 )
+       // {
+       // PutData (myCurve.size());
+       // PutData (myCurve_u);
+       // }
 
     ASSERT( myCurve.size() != 0 );
     myCurve.pop_front();
