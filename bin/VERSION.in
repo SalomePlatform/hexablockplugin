@@ -1,0 +1,3 @@
+[SALOME HEXABLOCKPLUGIN] : @VERSION@
+[DEVELOPMENT]            : @VERSION_DEV@
+[DESCRIPTION]            : HEXABLOCK meshing plug-in for SALOME Mesh module
