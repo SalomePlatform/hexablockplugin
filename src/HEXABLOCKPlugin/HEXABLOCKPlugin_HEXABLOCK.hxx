@@ -27,7 +27,7 @@
 #ifndef _HEXABLOCKPlugin_HEXABLOCK_HXX_
 #define _HEXABLOCKPlugin_HEXABLOCK_HXX_
 
-#include "SMESH_3D_Algo.hxx"
+#include "SMESH_Algo.hxx"
 #include "SMESH_Mesh.hxx"
 
 class SMESH_Mesh;
