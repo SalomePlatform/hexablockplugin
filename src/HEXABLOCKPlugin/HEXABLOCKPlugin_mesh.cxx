@@ -89,7 +89,7 @@
 #endif
 
 #ifdef _DEBUG_
-static int MYDEBUG = 1;
+static int MYDEBUG = HEXA_NS::on_debug ();
 #else
 static int MYDEBUG = 0;
 #endif
@@ -496,8 +496,8 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
     if(MYDEBUG) MESSAGE("INITIAL QUAD FOUND!" );
     for ( int j=0 ; j < 4 ; ++j ){
       e = q->getEdge(j);
-      if  ( (e_0 == e->getVertex(0)) and (e_1 == e->getVertex(1)) or 
-            (e_0 == e->getVertex(1)) and (e_1 == e->getVertex(0)) ){
+      if  (    ((e_0 == e->getVertex(0)) && (e_1 == e->getVertex(1)))
+            || ((e_0 == e->getVertex(1)) && (e_1 == e->getVertex(0))) ){
         break;
       }
     }

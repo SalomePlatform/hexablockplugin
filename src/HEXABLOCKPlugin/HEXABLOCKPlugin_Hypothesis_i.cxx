@@ -33,7 +33,7 @@
 #include <utilities.h>
 
 #ifdef _DEBUG_
-static int MYDEBUG = 1;
+static int MYDEBUG = HEXA_NS::on_debug ();
 #else
 static int MYDEBUG = 0;
 #endif
