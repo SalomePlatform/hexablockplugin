@@ -34,6 +34,7 @@
 
 #include "SMESH_Gen.hxx"
 #include "SMESH_Mesh.hxx"
+#include "SMESH_subMesh.hxx"
 #include "SMESH_MesherHelper.hxx"
 
 #include "HEXABLOCKPlugin_mesh.hxx"
@@ -151,6 +152,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape&
       default: return( Compute3D(theMesh) );
     };
   }
+  return false;
 }
 
 //=============================================================================
