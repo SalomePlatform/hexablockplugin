@@ -99,7 +99,6 @@ static double HEXA_EPSILON = 1E-3; //1E-3;
 static double HEXA_QUAD_WAY = PI/4.; //3.*PI/8.;
 // static double HEXA_QUAD_WAY2 = 499999999.*PI/1000000000.;
 
-
 TopoDS_Shape string2shape( const string& brep )
 {
   TopoDS_Shape shape;
@@ -108,7 +107,6 @@ TopoDS_Shape string2shape( const string& brep )
   BRepTools::Read(shape, streamBrep, aBuilder);
   return shape;
 }
-
 
 bool shape2coord(const TopoDS_Shape& aShape, double& x, double& y, double& z)
 {
@@ -124,8 +122,6 @@ bool shape2coord(const TopoDS_Shape& aShape, double& x, double& y, double& z)
        return(0);
    };
 }
-
-
 
 // SMESH_HexaBlocks::SMESH_HexaBlocks( SMESH_Mesh* theMesh ):
 SMESH_HexaBlocks::SMESH_HexaBlocks(SMESH_Mesh& theMesh):
@@ -1125,6 +1121,7 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
 
   // A) Vertex computation
   
+  doc->lockDump ();
   int nVertex = doc->countUsedVertex();
   HEXA_NS::Vertex* vertex = NULL;
 
@@ -1172,6 +1169,7 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
   ok = computeHexa(doc);
 
   if(MYDEBUG) MESSAGE("computeDoc() : end  >>>>>>>>");
+  doc->lockDump ();
   return ok;
 }
 
@@ -1274,8 +1272,8 @@ void SMESH_HexaBlocks::_buildMyCurve(
           assoc != associations.end();
           ++assoc ){
         string        theBrep  = (*assoc)->getBrep();
-        double        ass_debut = std::min ((*assoc)->debut, (*assoc)->fin);
-        double        ass_fin   = std::max ((*assoc)->debut, (*assoc)->fin);
+        double        ass_debut = std::min ((*assoc)->getStart(), (*assoc)->getEnd());
+        double        ass_fin   = std::max ((*assoc)->getStart(), (*assoc)->getEnd());
         TopoDS_Shape  theShape = string2shape( theBrep );
         TopoDS_Edge   theEdge  = TopoDS::Edge( theShape );
         double        theCurve_length = _edgeLength( theEdge );
@@ -1309,8 +1307,8 @@ void SMESH_HexaBlocks::_buildMyCurve(
               MESSAGE("FirstParameter ->"<<theCurve->FirstParameter());
               MESSAGE("LastParameter  ->"<<theCurve->LastParameter());
               MESSAGE("theCurve_length ->"<<theCurve_length);
-              MESSAGE("(*assoc)->debut ->"<< ass_debut );
-              MESSAGE("(*assoc)->fin   ->"<< ass_fin );
+              MESSAGE("(*assoc)->getStart() ->"<< ass_debut );
+              MESSAGE("(*assoc)->getEnd()   ->"<< ass_fin );
               MESSAGE("u_start ->"<<u_start);
               MESSAGE("u_end   ->"<<u_end);
               MESSAGE("myCurve_start( "<<myCurve_start.X()<<", "<<myCurve_start.Y()<<", "<<myCurve_start.Z()<<") ");
@@ -1555,8 +1553,7 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
 //   inter.Load(S, tol);
   inter.Perform(li, s, e);//inter.PerformNearest(li, s, e);
 
-/**************************************************************  Abu 2011-11-04 */
-  /// if ( inter.IsDone() && (inter.NbPnt()==1) ) {
+/***********************************************  Abu 2011-11-04 */
   if ( inter.IsDone() )
      {
      result = inter.Pnt(1);//first
@@ -1574,7 +1571,7 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
                }
             }
         }
-/**************************************************************  Abu 2011-11-04 (fin) */
+/**********************************************  Abu 2011-11-04 (getEnd()) */
     if (MYDEBUG){
       MESSAGE("_intersect() : OK");
       for ( int i=1; i <= inter.NbPnt(); ++i ){
@@ -1735,8 +1732,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::HexaCell:
         {
             HEXA_NS::Hexa* h = reinterpret_cast<HEXA_NS::Hexa*>(grHexElt);
-//             HEXA_NS::Hexa* h = dynamic_cast<HEXA_NS::Hexa*>(grHexElt);
-//             ASSERT(h);
             if ( _volumesOnHexa.count(h)>0 ){
               SMESHVolumes volumes = _volumesOnHexa[h];
               for ( SMESHVolumes::iterator aVolume = volumes.begin(); aVolume != volumes.end(); ++aVolume ){
@@ -1750,8 +1745,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::QuadCell:
         {
             HEXA_NS::Quad* q = reinterpret_cast<HEXA_NS::Quad*>(grHexElt);
-//             HEXA_NS::Quad* q = dynamic_cast<HEXA_NS::Quad*>(grHexElt);
-//             ASSERT(q);
             if ( _facesOnQuad.count(q)>0 ){
               SMESHFaces faces = _facesOnQuad[q];
               for ( SMESHFaces::iterator aFace = faces.begin(); aFace != faces.end(); ++aFace ){
@@ -1765,8 +1758,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::EdgeCell:
         {
             HEXA_NS::Edge* e = reinterpret_cast<HEXA_NS::Edge*>(grHexElt);
-//             HEXA_NS::Edge* e = dynamic_cast<HEXA_NS::Edge*>(grHexElt);
-//             ASSERT(e);
             if ( _edgesOnEdge.count(e)>0 ){
               SMESHEdges edges = _edgesOnEdge[e];
               for ( SMESHEdges::iterator anEdge = edges.begin(); anEdge != edges.end(); ++anEdge ){
@@ -1780,8 +1771,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::HexaNode: 
         {
             HEXA_NS::Hexa* h = reinterpret_cast<HEXA_NS::Hexa*>(grHexElt);
-//             HEXA_NS::Hexa* h = dynamic_cast<HEXA_NS::Hexa*>(grHexElt);
-//             ASSERT(h);
             if ( _volumesOnHexa.count(h)>0 ){
               SMESHVolumes volumes = _volumesOnHexa[h];
               for ( SMESHVolumes::iterator aVolume = volumes.begin(); aVolume != volumes.end(); ++aVolume ){
@@ -1802,8 +1791,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::QuadNode:
         {
             HEXA_NS::Quad* q = reinterpret_cast<HEXA_NS::Quad*>(grHexElt);
-//             HEXA_NS::Quad* q = dynamic_cast<HEXA_NS::Quad*>(grHexElt);
-//             ASSERT(q);
             if ( _quadNodes.count(q)>0 ){
               ArrayOfSMESHNodes nodesOnQuad = _quadNodes[q];
               for ( ArrayOfSMESHNodes::iterator nodes = nodesOnQuad.begin(); nodes != nodesOnQuad.end(); ++nodes){
@@ -1819,8 +1806,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::EdgeNode:
         {
             HEXA_NS::Edge* e = reinterpret_cast<HEXA_NS::Edge*>(grHexElt);
-//             HEXA_NS::Edge* e = dynamic_cast<HEXA_NS::Edge*>(grHexElt);
-//             ASSERT(e);
             if ( _nodesOnEdge.count(e)>0 ){
               SMESHNodes nodes = _nodesOnEdge[e];
               for ( SMESHNodes::iterator aNode = nodes.begin(); aNode != nodes.end(); ++aNode){
@@ -1834,8 +1819,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::VertexNode:
         {
           HEXA_NS::Vertex* v = reinterpret_cast<HEXA_NS::Vertex*>(grHexElt);
-//             HEXA_NS::Vertex* v = dynamic_cast<HEXA_NS::Vertex*>(grHexElt);
-//             ASSERT(v);
             if ( _node.count(v)>0 ){
               aGrEltIDs.push_back(_node[v]);
             } else {
@@ -1869,8 +1852,8 @@ void SMESH_HexaBlocks::_getCurve( const std::vector<HEXA_NS::Shape*>& shapesIn,
   GeomConvert_CompCurveToBSplineCurve* gen = NULL;
 
   double curvesLenght = 0.;
-  double curvesFirst = shapesIn.front()->debut;
-  double curvesLast  = shapesIn.back()->fin;
+  double curvesFirst = shapesIn.front()->getStart();
+  double curvesLast  = shapesIn.back()->getEnd();
 
   for ( std::vector <HEXA_NS::Shape*> ::const_iterator assoc = shapesIn.begin();
         assoc != shapesIn.end();
@@ -1901,47 +1884,3 @@ void SMESH_HexaBlocks::_getCurve( const std::vector<HEXA_NS::Shape*>& shapesIn,
 
 }
 
-
-
-
-
-// bool SMESH_HexaBlocks::_areSame(double a, double b)
-// {
-//   return fabs(a - b) < HEXA_EPSILON;
-// }
-// //     MESSAGE("Angular() :" << dir2.IsOpposite(dir1, Precision::Angular()));
-// //   ASSERT( dir2.IsParallel(dir1, HEXA_QUAD_WAY) );
-// //   bool test2 = norm2.IsOpposite(norm1, HEXA_QUAD_WAY2) == norm3.IsOpposite(norm1, HEXA_QUAD_WAY2);
-// //       way = norm1.IsOpposite(norm3.Reversed(), HEXA_QUAD_WAY2);
-//   gp_Pnt p( n->X(), n->Y(), n->Z() );
-//   gp_Pnt ptOnPlane;
-//   gp_Pnt ptOnSurface;
-//   gp_Pnt ptOnPlaneOrSurface;
-// //   gp_Vec norm2(p1, p);
-//   TopoDS_Shape  planeOrSurface;
-// 
-// 
-//   gp_Pln        pln(p1, dir1);
-//   TopoDS_Shape  shapePln = BRepBuilderAPI_MakeFace(pln).Face();
-//   ptOnPlane = _intersect( p, a1, b1, shapePln );
-//   ptOnPlaneOrSurface = ptOnPlane;
-// 
-// 
-// //   if ( assoc != NULL ){
-// //     MESSAGE("_computeQuadWay with assoc");
-//   for( int i=0; i < h->countEdge(); ++i  ){ 
-//     HEXA_NS::Edge* e = h->getUsedEdge(i);
-//     if ( e->definedBy(v1,v2) ){
-//       const std::vector <HEXA_NS::Shape*> assocs = e->getAssociations();
-//       if ( assocs.size() != 0 ){
-//         HEXA_NS::Shape* assoc = assocs[0]; //CS_TODO
-//         string        theBrep  = assoc->getBrep();
-//         TopoDS_Shape  theShape = string2shape( theBrep );
-//         ptOnSurface = _intersect( p, a1, b1, theShape );
-//         if ( !ptOnSurface.IsEqual(p, HEXA_EPSILON) ){
-//           ptOnPlaneOrSurface = ptOnSurface;
-//         } 
-//       }
-//     }
-//   }
-// 
