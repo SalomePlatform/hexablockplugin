@@ -17,7 +17,7 @@
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 //  File   : SMESH_HexaBlocks.cxx
-//  Author : 
+//  Author :
 //  Module : SMESH
 //
 
@@ -61,8 +61,9 @@
 #include "HexQuad.hxx"
 #include "HexHexa.hxx"
 #include "HexPropagation.hxx"
-#include "HexShape.hxx"
 #include "HexGroup.hxx"
+#include "hexa_base.hxx"
+#include "HexAssoEdge.hxx"
 
 // HEXABLOCKPLUGIN includes
 #include "HEXABLOCKPlugin_mesh.hxx"
@@ -89,17 +90,16 @@
 #endif
 
 #ifdef _DEBUG_
-static int MYDEBUG = HEXA_NS::on_debug ();
+static int  MYDEBUG = HEXA_NS::on_debug ();
 #else
-static int MYDEBUG = 0;
+static int  MYDEBUG = 0;
 #endif
 
 
-static double HEXA_EPSILON = 1E-3; //1E-3; 
+static double HEXA_EPS      = 1.0e-3; //1E-3;
 static double HEXA_QUAD_WAY = PI/4.; //3.*PI/8.;
-// static double HEXA_QUAD_WAY2 = 499999999.*PI/1000000000.;
 
-
+// ============================================================ string2shape
 TopoDS_Shape string2shape( const string& brep )
 {
   TopoDS_Shape shape;
@@ -109,7 +109,7 @@ TopoDS_Shape string2shape( const string& brep )
   return shape;
 }
 
-
+// ============================================================ shape2coord
 bool shape2coord(const TopoDS_Shape& aShape, double& x, double& y, double& z)
 {
    if ( aShape.ShapeType() == TopAbs_VERTEX ){
@@ -124,9 +124,37 @@ bool shape2coord(const TopoDS_Shape& aShape, double& x, double& y, double& z)
        return(0);
    };
 }
+// ============================================================= edge_length
+double edge_length(const TopoDS_Edge & E)
+{
+  double UMin = 0, UMax = 0;
+  if (BRep_Tool::Degenerated(E))
+    return 0;
+  TopLoc_Location L;
+  Handle(Geom_Curve) C = BRep_Tool::Curve(E, L, UMin, UMax);
+  GeomAdaptor_Curve AdaptCurve(C);
+  double length = GCPnts_AbscissaPoint::Length(AdaptCurve, UMin, UMax);
+  return length;
+}
+// =============================================================== make_curve
+BRepAdaptor_Curve* make_curve (gp_Pnt& pstart, gp_Pnt& pend,
+                               double& length, double& u_start,
+                               HEXA_NS::Edge& edge, int nro)
+{
+   Hex::AssoEdge*     asso       = edge.getAssociation (nro);
+   BRepAdaptor_Curve* the_curve  = asso->getCurve();
+   length    = asso->length ();
+   if (length <= 1e-6)
+       return NULL;
 
-
-
+   const double* point1 = asso->getOrigin ();
+   const double* point2 = asso->getExtrem ();
+   pstart  = gp_Pnt (point1[0],  point1[1],  point1[2]);
+   pend    = gp_Pnt (point2[0],  point2[1],  point2[2]);
+   u_start = asso->getUstart();
+   return the_curve;
+}
+// ============================================================== Constructeur
 // SMESH_HexaBlocks::SMESH_HexaBlocks( SMESH_Mesh* theMesh ):
 SMESH_HexaBlocks::SMESH_HexaBlocks(SMESH_Mesh& theMesh):
   _total(0),
@@ -153,86 +181,19 @@ SMESH_HexaBlocks::~SMESH_HexaBlocks()
 // --------------------------------------------------------------
 //                     Vertex computing
 // --------------------------------------------------------------
+//--+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+// ============================================================== computeVertex
 bool SMESH_HexaBlocks::computeVertex(HEXA_NS::Vertex& vx)
 {
-  bool ok = false;
-  ok = computeVertexByAssoc( vx );
-  if ( ok == false ){
-    ok = computeVertexByModel( vx );
-  }
-  if (ok == true){
-    _computeVertexOK = true;
-  }
-  return ok;
+  double           px, py, pz;
+  vx.getAssoCoord (px, py, pz);
+
+  SMDS_MeshNode* new_node = _theMeshDS->AddNode (px, py, pz);
+  _vertex [new_node] = &vx;
+  _node   [&vx]      = new_node;    //needed in computeEdge()
+  _computeVertexOK   = true;
+  return true;
 }
-
-
-bool SMESH_HexaBlocks::computeVertexByAssoc(HEXA_NS::Vertex& vx)
-{
-  if(MYDEBUG) MESSAGE("computeVertexByAssoc() : : begin   <<<<<<");
-  bool ok = true;
-
-  SMDS_MeshNode* newNode = NULL; // new node on mesh
-  double x, y, z; //new node coordinates
-
-  HEXA_NS::Shape* assoc = vx.getAssociation();
-  if ( assoc == NULL ){
-    if (MYDEBUG){
-      MESSAGE("computeVertexByAssoc() : ASSOC not found " << vx.getName ());
-      // vx.printName();
-    }
-    return false;
-  }
-
-  string strBrep = assoc->getBrep();
-  TopoDS_Shape shape = string2shape( strBrep );
-  ok = shape2coord( shape, x, y, z );
-//   ASSERT(ok);
-  if (!ok) throw (SALOME_Exception(LOCALIZED("vertex association : shape2coord() error ")));
-  newNode = _theMeshDS->AddNode(x, y, z);
-  if  (_node.count(&vx) >= 1  and MYDEBUG) MESSAGE("_node : ALREADY");
-  _node[&vx] = newNode;//needed in computeEdge()
-  _vertex[newNode] = &vx;
-
-  if (MYDEBUG){
-    MESSAGE("computeVertexByAssoc() : ASSOC found " << vx.getName());
-    /// vx.printName();
-    MESSAGE("( "<< x <<","<< y <<","<< z <<" )");
-  }
-
-  if(MYDEBUG) MESSAGE("computeVertexByAssoc() : end  >>>>>>>>");
-  return ok;
-}
-
-bool SMESH_HexaBlocks::computeVertexByModel(HEXA_NS::Vertex& vx)
-{
-  if(MYDEBUG) MESSAGE("computeVertexByModel() : : begin   <<<<<<");
-  bool ok = true;
-
-  SMDS_MeshNode* newNode = NULL; // new node on mesh
-  double x, y, z; //new node coordinates
-
-//   vx.printName();
-//   std::cout << std::endl;
-  x = vx.getX();
-  y = vx.getY();
-  z = vx.getZ();
-
-  newNode = _theMeshDS->AddNode(x, y, z);
-
-  if  (_node.count(&vx) >= 1 and MYDEBUG) MESSAGE("_node : ALREADY");
-  _node[&vx] = newNode;//needed in computeEdge()
-  _vertex[newNode] = &vx;
-  if (MYDEBUG){
-    MESSAGE("computeVertexByModel() :" << vx.getName());
-    /// vx.printName();
-    MESSAGE("( "<< x <<","<< y <<","<< z <<" )");
-  }
-
-  if(MYDEBUG) MESSAGE("computeVertexByModel() : end  >>>>>>>>");
-  return ok;
-}
-
 // --------------------------------------------------------------
 //                      Edge computing
 // --------------------------------------------------------------
@@ -267,10 +228,9 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
   ASSERT( _computeVertexOK );
   bool ok = true;
 
-  const std::vector <HEXA_NS::Shape*> associations = edge.getAssociations();
-  if ( associations.size() == 0 ){
-    return false;
-  }
+  if (NOT edge.isAssociated())
+     return false;
+
   //vertex from edge
   HEXA_NS::Vertex* vx0 = NULL;
   HEXA_NS::Vertex* vx1 = NULL;
@@ -288,22 +248,21 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
   SMDS_MeshNode* LAST_NODE  = _node[vx1];
 
 
-  // A) Build myCurve
-  std::list< BRepAdaptor_Curve* >        myCurve;
-  double                                 myCurve_length;
+  // A) Build myCurve_list
+  std::list< BRepAdaptor_Curve* >        myCurve_list;
+  double                                 myCurve_tot_len;
   std::map< BRepAdaptor_Curve*, double>  myCurve_lengths;
   std::map< BRepAdaptor_Curve*, bool>    myCurve_ways;
   std::map< BRepAdaptor_Curve*, double>  myCurve_starts;
-  gp_Pnt                                 myCurve_start( FIRST_NODE->X(), FIRST_NODE->Y(), FIRST_NODE->Z() );
-  gp_Pnt                                 myCurve_end( LAST_NODE->X(), LAST_NODE->Y(), LAST_NODE->Z() );
 
+  gp_Pnt myCurve_pt_start(FIRST_NODE->X(), FIRST_NODE->Y(), FIRST_NODE->Z());
+  gp_Pnt myCurve_pt_end  (LAST_NODE->X(),  LAST_NODE->Y(),  LAST_NODE->Z());
 
   _buildMyCurve(
-      associations,
-      myCurve_start,
-      myCurve_end,
-      myCurve,
-      myCurve_length,
+      myCurve_pt_start,
+      myCurve_pt_end,
+      myCurve_list,
+      myCurve_tot_len,
       myCurve_lengths,
       myCurve_ways,
       myCurve_starts,
@@ -311,7 +270,7 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
   );
 
 
-  // B) Build nodes and edges on mesh from myCurve
+  // B) Build nodes and edges on mesh from myCurve_list
   SMDS_MeshNode* node_a  = NULL;
   SMDS_MeshNode* node_b  = NULL;
   SMDS_MeshEdge* edge_ab = NULL;
@@ -328,20 +287,25 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
   double u, myCurve_u;
   double myCurve_start_u = 0.;
   int nbNodes = law.getNodes(); //law of discretization
+  if (myCurve_list.size()==0)
+     {
+     PutData (edge.getName());
+     nbNodes = 0;
+     }
   if (MYDEBUG) MESSAGE("nbNodes -> "<<nbNodes);
   for (int i = 0; i < nbNodes; ++i){
       u = _Xx(i, law, nbNodes); //u between [0,1]
-      myCurve_u = u*myCurve_length;
+      myCurve_u = u*myCurve_tot_len;
       if (MYDEBUG) {
         MESSAGE("u -> "<<u);
         MESSAGE("myCurve_u  -> "<<myCurve_u);
-        MESSAGE("myCurve_length -> "<<myCurve_length);
+        MESSAGE("myCurve_tot_len -> "<<myCurve_tot_len);
       }
       ptOnMyCurve = _getPtOnMyCurve( myCurve_u,
                                      myCurve_ways,
                                      myCurve_lengths,
                                      myCurve_starts,
-                                     myCurve,
+                                     myCurve_list,
                                      myCurve_start_u
                                      );
 
@@ -349,7 +313,6 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
       edge_ab     = _theMeshDS->AddEdge( node_a, node_b );
       nodesOnEdge.push_back( node_b );
       edgesOnEdge.push_back( edge_ab );
-//       nodesXxOnEdge.push_back( u );
       if  (_nodeXx.count(node_b) >= 1 ) ASSERT(false);
       _nodeXx[node_b] = u;
       node_a = node_b;
@@ -357,14 +320,9 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
   edge_ab      = _theMeshDS->AddEdge( node_a, LAST_NODE );
   nodesOnEdge.push_back( LAST_NODE );
   edgesOnEdge.push_back( edge_ab );
-//   nodesXxOnEdge.push_back( 1. );
-  // _nodeXx[LAST_NODE] = 1.;
   _nodesOnEdge[&edge] = nodesOnEdge;
   _edgesOnEdge[&edge] = edgesOnEdge;
 
-
-
-//   _edgeXx[&edge]      = nodesXxOnEdge;
 
   if(MYDEBUG) MESSAGE("computeEdgeByAssoc() : end  >>>>>>>>");
   return ok;
@@ -482,7 +440,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
     }
   }
 
-  // SECOND STEP: setting edges ways 
+  // SECOND STEP: setting edges ways
   while ( skinQuad.size()>0 ){
     if(MYDEBUG) MESSAGE("SEARCHING INITIAL QUAD ..." );
     for ( std::list<HEXA_NS::Quad*>::iterator it = skinQuad.begin(); it != skinQuad.end(); it++ ){
@@ -492,7 +450,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
           break;
         }
     }
-    if ( e_0 == NULL and e_1 == NULL ) ASSERT(false);// should never happened, 
+    if ( e_0 == NULL and e_1 == NULL ) ASSERT(false);// should never happened,
     if(MYDEBUG) MESSAGE("INITIAL QUAD FOUND!" );
     for ( int j=0 ; j < 4 ; ++j ){
       e = q->getEdge(j);
@@ -518,7 +476,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
                   if ( q == first_q ){
                     localEdgeWays[e] = std::make_pair( edgeWays[e].first, edgeWays[e].second );
                   } else {
-                    localEdgeWays[e] = std::make_pair( edgeWays[e].second, edgeWays[e].first); 
+                    localEdgeWays[e] = std::make_pair( edgeWays[e].second, edgeWays[e].first);
                   }
                   firstVertex = localEdgeWays[e].first;
                   lastVertex  = localEdgeWays[e].second;
@@ -526,7 +484,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
             } else {
               HEXA_NS::Vertex* e_0 = e->getVertex(0);
               HEXA_NS::Vertex* e_1 = e->getVertex(1);
-  
+
               if ( lastVertex == e_0 ){
                 firstVertex = e_0; lastVertex = e_1;
               } else if ( lastVertex == e_1 ){
@@ -545,8 +503,8 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
             }
             ++i;
         }
-  
-  
+
+
         //add new working quad
         for ( int i=0 ; i < 4; ++i ){
             HEXA_NS::Quad* next_q = NULL;
@@ -557,7 +515,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
                   next_q = NULL;
                 }
                 int fromSkin = std::count( skinQuad.begin(), skinQuad.end(), next_q );
-                if (fromSkin != 0){ 
+                if (fromSkin != 0){
                   int fromWorkingQuad = std::count( workingQuad.begin(), workingQuad.end(), next_q );
                     if ( fromWorkingQuad == 0 ){
                         workingQuad.push_front( next_q );
@@ -565,11 +523,11 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
                 }
             }
         }
-  
+
         // setting quad way
         HEXA_NS::Edge* e0 = q->getEdge(0);
         HEXA_NS::Vertex* e0_0 = e0->getVertex(0);
-  
+
         if (  e0_0 == localEdgeWays[ e0 ].first ){
             quadWays[q] = true;
         } else if ( e0_0 == localEdgeWays[ e0 ].second ){
@@ -596,7 +554,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 // //   std::map<HEXA_NS::Edge*, bool>  edgeWays;
 // //   std::map<HEXA_NS::Edge*, std::pair<HEXA_NS::Vertex*, HEXA_NS::Vertex*> > edgeWays;
 //   std::map<HEXA_NS::Quad*, std::pair<HEXA_NS::Vertex*, HEXA_NS::Vertex*> > workingQuads;
-// 
+//
 //   std::list<HEXA_NS::Quad*>       skinQuad;
 //   std::list<HEXA_NS::Quad*>       notSkinQuad;
 // //   std::list<HEXA_NS::Quad*>       workingQuad;
@@ -604,7 +562,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 //   HEXA_NS::Quad* q = NULL;
 //   HEXA_NS::Edge* e = NULL;
 //   HEXA_NS::Vertex *e_0, *e_1 = NULL;
-// 
+//
 //   // FIRST STEP: eliminate free quad + internal quad
 //   int nTotalQuad = doc.countQuad();
 //   for (int i=0; i < nTotalQuad; ++i ){
@@ -616,29 +574,29 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 //       default: if ( q->getNbrParents() > 2 ) ASSERT(false);
 //     }
 //   }
-// 
-// 
+//
+//
 //   // SECOND STEP
 //   q = first_q = skinQuad.front();
 //   e = q->getUsedEdge(0);
 //   e_0 = e->getVertex(0);
 //   e_1 = e->getVertex(1);
-// 
+//
 //   workingQuads[q] = std::make_pair( e_0, e_1 );
-// 
+//
 //   while ( workingQuads.size() > 0 ){
 //       MESSAGE("CURRENT QUAD ------>"<< q->getId());
 //       HEXA_NS::Vertex *lastVertex=NULL, *firstVertex = NULL;
 //       int i = 0;
-// 
+//
 //       std::map<HEXA_NS::Edge*, std::pair<HEXA_NS::Vertex*, HEXA_NS::Vertex*> > localEdgeWays;
 //       while ( localEdgeWays.size() != 4 ){
 //           HEXA_NS::Edge* e = q->getUsedEdge(i%4);
 //           if ( lastVertex == NULL ){
 //               HEXA_NS::Vertex* e_0 = e->getVertex(0);
 //               HEXA_NS::Vertex* e_1 = e->getVertex(1);
-// 
-//               if ( (workingQuads[q].first == e_0 and workingQuads[q].second == e_1) 
+//
+//               if ( (workingQuads[q].first == e_0 and workingQuads[q].second == e_1)
 //                     or (workingQuads[q].first == e_1 and workingQuads[q].second == e_0) ){
 //                 if ( q == first_q ){
 //                   localEdgeWays[e] = std::make_pair( workingQuads[q].first, workingQuads[q].second );
@@ -675,8 +633,8 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 //           }
 //           ++i;
 //       }
-// 
-// 
+//
+//
 //       //add new working quad
 //       for ( int i=0 ; i < 4; ++i ){
 //           HEXA_NS::Quad* next_q = NULL;
@@ -688,23 +646,23 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 //                 next_q = NULL;
 //               }
 //               int fromSkin = std::count( skinQuad.begin(), skinQuad.end(), next_q );
-//               if (fromSkin != 0){ 
+//               if (fromSkin != 0){
 // //                 int fromWorkingQuad = std::count( workingQuads.begin(), workingQuads.end(), next_q );
 //                 int fromWorkingQuad = workingQuads.count( next_q );
-// //             MESSAGE("CHECK QUAD:"<< newWorkingQuad->getId()); 
+// //             MESSAGE("CHECK QUAD:"<< newWorkingQuad->getId());
 //                   if ( fromWorkingQuad == 0 ){
 // //                       workingQuads.push_front( next_q );
 //                       workingQuads[ next_q ] = localEdgeWays[e];
-// //                   MESSAGE("EDGE :"<<e->getId()<<"ADD QUAD :"<< newWorkingQuad->getId()); 
+// //                   MESSAGE("EDGE :"<<e->getId()<<"ADD QUAD :"<< newWorkingQuad->getId());
 //                   }
 //               }
 //           }
 //       }
-// 
+//
 //       //setting quad way
 //       HEXA_NS::Edge* e0 = q->getUsedEdge(0);
 //       HEXA_NS::Vertex* e0_0 = e0->getVertex(0);
-// 
+//
 //       if (  e0_0 == localEdgeWays[ e0 ].first ){
 //           quadWays[q] = true;
 //       } else if ( e0_0 == localEdgeWays[ e0 ].second ){
@@ -713,7 +671,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 //         ASSERT(false);
 //       }
 //       MESSAGE("quadWays ID ="<< q->getId() << ", WAY = " << quadWays[q] );
-// 
+//
 // //       workingQuad.remove( q );
 //       workingQuads.erase( q );
 //       skinQuad.remove( q );
@@ -767,14 +725,14 @@ bool SMESH_HexaBlocks::computeQuadByAssoc( HEXA_NS::Quad& quad, bool way  )
     return false;
   }
 
-  const std::vector <HEXA_NS::Shape*>  shapes = quad.getAssociations();
-  if ( shapes.size() == 0 ){
-    if(MYDEBUG) MESSAGE("computeQuadByAssoc() : end  >>>>>>>>");
-    return false;
-  }  
-  TopoDS_Shape shapeOrCompound = _getShapeOrCompound( shapes );
-//   bool quadWay = _computeQuadWay( quad, S1, S2, S3, S4, &shapeOrCompound );
-//   bool quadWay = _computeQuadWay( quad );
+  int nbass  = quad.countAssociation ();
+  if (nbass==0)
+     {
+     if(MYDEBUG) MESSAGE("computeQuadByAssoc() : end  >>>>>>>>");
+     return false;
+     }
+
+  TopoDS_Shape shapeOrCompound = getFaceShapes ( quad );
 
 
   std::map<SMDS_MeshNode*, gp_Pnt> interpolatedPoints;
@@ -782,7 +740,6 @@ bool SMESH_HexaBlocks::computeQuadByAssoc( HEXA_NS::Quad& quad, bool way  )
   int jSize = nodesOnQuad[0].size();
 
   S1 = nodesOnQuad[0][0];
-//   S2 = nodesOnQuad[bNodes.size()-1][0];
   S2 = nodesOnQuad[iSize-1][0];
   S4 = nodesOnQuad[0][jSize-1];
   S3 = nodesOnQuad[iSize-1][jSize-1];
@@ -805,7 +762,7 @@ bool SMESH_HexaBlocks::computeQuadByAssoc( HEXA_NS::Quad& quad, bool way  )
             double v = yy[j];
 
             _nodeInterpolationUV(u, v, Pg, Pd, Ph, Pb, S1, S2, S3, S4, newNodeX, newNodeY, newNodeZ);
-              gp_Pnt newPt = gp_Pnt( newNodeX, newNodeY, newNodeZ );//interpolated point 
+              gp_Pnt newPt = gp_Pnt( newNodeX, newNodeY, newNodeZ );//interpolated point
               gp_Pnt pt1;
               gp_Pnt pt3;
               if ( interpolatedPoints.count(n1) > 0 ){
@@ -856,7 +813,7 @@ bool SMESH_HexaBlocks::computeQuadByAssoc( HEXA_NS::Quad& quad, bool way  )
   }
   _quadNodes[ &quad ] = nodesOnQuad;
   _facesOnQuad[&quad] = facesOnQuad;
-  
+
   if(MYDEBUG) MESSAGE("computeQuadByLinearApproximation() : end  >>>>>>>>");
   return ok;
 }
@@ -1022,7 +979,7 @@ bool SMESH_HexaBlocks::computeQuadByLinearApproximation( HEXA_NS::Quad& quad, bo
   std::vector<double> xx, yy;
 
   // Elements for quad computation
-  SMDS_MeshNode *S1, *S2, *S4, *S3; 
+  SMDS_MeshNode *S1, *S2, *S4, *S3;
 
 //   bool initOk = _computeQuadInit( quad, eh, eb, eg, ed, S1, S2, S3, S4 );
   bool initOk = _computeQuadInit( quad, nodesOnQuad, xx, yy );
@@ -1079,7 +1036,7 @@ bool SMESH_HexaBlocks::computeQuadByLinearApproximation( HEXA_NS::Quad& quad, bo
   }
   _quadNodes[ &quad ] = nodesOnQuad;
   _facesOnQuad[&quad] = facesOnQuad;
-  
+
   if(MYDEBUG) MESSAGE("computeQuadByLinearApproximation() : end  >>>>>>>>");
   return ok;
 }
@@ -1124,7 +1081,8 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
   bool ok = true;
 
   // A) Vertex computation
-  
+
+  doc->lockDump ();
   int nVertex = doc->countUsedVertex();
   HEXA_NS::Vertex* vertex = NULL;
 
@@ -1172,6 +1130,7 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
   ok = computeHexa(doc);
 
   if(MYDEBUG) MESSAGE("computeDoc() : end  >>>>>>>>");
+  doc->lockDump ();
   return ok;
 }
 
@@ -1235,6 +1194,7 @@ double SMESH_HexaBlocks::_Xx( double i, HEXA_NS::Law law, double nbNodes) //, do
 }
 
 
+// ============================================================= _edgeLength
 double SMESH_HexaBlocks::_edgeLength(const TopoDS_Edge & E)
 {
   if(MYDEBUG) MESSAGE("_edgeLength() : : begin   <<<<<<");
@@ -1248,142 +1208,115 @@ double SMESH_HexaBlocks::_edgeLength(const TopoDS_Edge & E)
   if(MYDEBUG) MESSAGE("_edgeLength() : end  >>>>>>>>");
   return length;
 }
-
-
+//--+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+// ============================================================== _buildMyCurve
+// === construire ma courbe a moi
 void SMESH_HexaBlocks::_buildMyCurve(
-    const std::vector <HEXA_NS::Shape*>& 	associations,   //IN
-    const gp_Pnt&                               myCurve_start,  //IN
-    const gp_Pnt&				myCurve_end,    //IN
-    std::list< BRepAdaptor_Curve* >& 	        myCurve,        //INOUT
-    double& 				        myCurve_length, //INOUT
+    const gp_Pnt&                               myCurve_pt_start,  //IN
+    const gp_Pnt&				myCurve_pt_end,    //IN
+    std::list< BRepAdaptor_Curve* >& 	        myCurve_list,        //INOUT
+    double& 				        myCurve_tot_len, //INOUT
     std::map< BRepAdaptor_Curve*, double>& 	myCurve_lengths,//INOUT
     std::map< BRepAdaptor_Curve*, bool>& 	myCurve_ways,   //INOUT
     std::map< BRepAdaptor_Curve*, double>&      myCurve_starts,   //INOUT
     HEXA_NS::Edge& 	                        edge) // For error diagnostic
 {
     if(MYDEBUG) MESSAGE("_buildMyCurve() : : begin   <<<<<<");
-    bool myCurve_way  = true;
-    myCurve_length    = 0.;
+    bool current_way  = true;
+    myCurve_tot_len    = 0.;
     BRepAdaptor_Curve* thePreviousCurve = NULL;
     BRepAdaptor_Curve* theCurve         = NULL;
 
-    gp_Pnt  theCurve_start, theCurve_end;
-    gp_Pnt  thePreviousCurve_start , thePreviousCurve_end;
+    gp_Pnt  curv_start, curv_end;
+    gp_Pnt  p_curv_start , p_curv_end;
+    double u_start     = 0;
+    double curv_length = 0;
 
-    for ( std::vector <HEXA_NS::Shape*> ::const_iterator assoc = associations.begin();
-          assoc != associations.end();
-          ++assoc ){
-        string        theBrep  = (*assoc)->getBrep();
-        double        ass_debut = std::min ((*assoc)->debut, (*assoc)->fin);
-        double        ass_fin   = std::max ((*assoc)->debut, (*assoc)->fin);
-        TopoDS_Shape  theShape = string2shape( theBrep );
-        TopoDS_Edge   theEdge  = TopoDS::Edge( theShape );
-        double        theCurve_length = _edgeLength( theEdge );
-        if (MYDEBUG)
-            MESSAGE("_edgeLength ->"<<theCurve_length);
+    int nbass = edge.countAssociation();
+    for (int nro = 0 ; nro < nbass ; ++nro)
+        {
+        theCurve = make_curve (curv_start, curv_end, curv_length, u_start,
+                               edge, nro);
+        if (theCurve != NULL)
+           {
+            bool    sens   = true;
+            if ( thePreviousCurve == NULL )
+               {
+               // setting current_way and first curve way
+               if ( myCurve_pt_start.IsEqual(curv_start, HEXA_EPS) )
+                  {
+                  current_way = true;
+                  sens        = true;
+                  }
+               else if ( myCurve_pt_start.IsEqual(curv_end, HEXA_EPS) )
+                  {
+                  current_way = true;
+                  sens        = false;
+                  }
+               else if ( myCurve_pt_end.IsEqual(curv_end, HEXA_EPS) )
+                  {
+                  current_way = false;
+                  sens        = true;
+                  }
+               else if ( myCurve_pt_end.IsEqual(curv_start, HEXA_EPS) )
+                  {
+                  current_way = false;
+                  sens        = false;
+                  }
+               else
+                  {
+                 if (MYDEBUG)
+                     MESSAGE("SOMETHING WRONG on edge association... Bad script?");
+                 edge.dumpAsso();
+                 throw (SALOME_Exception (LOCALIZED("Edge association : check association parameters ( first, last ) between HEXA model and CAO")));
+                   }
 
-        if ( theCurve_length > 0 ){
-            double f, l;
-            Handle(Geom_Curve) testCurve = BRep_Tool::Curve(theEdge, f, l);
-            theCurve = new BRepAdaptor_Curve( theEdge );
-
-            GCPnts_AbscissaPoint discret_start (*theCurve, 
-                                                 theCurve_length*ass_debut, 
-                                                 theCurve->FirstParameter() );
-            GCPnts_AbscissaPoint discret_end (*theCurve, 
-                                               theCurve_length*ass_fin, 
-                                               theCurve->FirstParameter() );
-            double u_start = discret_start.Parameter();
-            double u_end   = discret_end.Parameter();
-            ASSERT( discret_start.IsDone() && discret_end.IsDone() );
-            theCurve_start  = theCurve->Value( u_start);
-            theCurve_end    = theCurve->Value( u_end );
-            theCurve_length = theCurve_length*( ass_fin - ass_debut);
-
-            if (MYDEBUG){
-              MESSAGE("testCurve->f ->"<<f);
-              MESSAGE("testCurve->l ->"<<l);
-              MESSAGE("testCurve->FirstParameter ->"<<testCurve->FirstParameter());
-              MESSAGE("testCurve->LastParameter  ->"<<testCurve->LastParameter());
-
-              MESSAGE("FirstParameter ->"<<theCurve->FirstParameter());
-              MESSAGE("LastParameter  ->"<<theCurve->LastParameter());
-              MESSAGE("theCurve_length ->"<<theCurve_length);
-              MESSAGE("(*assoc)->debut ->"<< ass_debut );
-              MESSAGE("(*assoc)->fin   ->"<< ass_fin );
-              MESSAGE("u_start ->"<<u_start);
-              MESSAGE("u_end   ->"<<u_end);
-              MESSAGE("myCurve_start( "<<myCurve_start.X()<<", "<<myCurve_start.Y()<<", "<<myCurve_start.Z()<<") ");
-              MESSAGE("theCurve_start( "<<theCurve_start.X()<<", "<<theCurve_start.Y()<<", "<<theCurve_start.Z()<<") ");
-              MESSAGE("myCurve_end( "<<myCurve_end.X()<<", "<<myCurve_end.Y()<<", "<<myCurve_end.Z()<<") ");  
-              MESSAGE("theCurve_end( "<<theCurve_end.X()<<", "<<theCurve_end.Y()<<", "<<theCurve_end.Z()<<") ");
-            }
-
-            if ( thePreviousCurve == NULL ){ 
-                // setting myCurve_way and first curve way
-                if ( myCurve_start.IsEqual(theCurve_start, HEXA_EPSILON) ){
-                    if(MYDEBUG) MESSAGE("myCurve_start.IsEqual(theCurve_start, HEXA_EPSILON)");
-                    myCurve_way = true;
-                    myCurve_ways[theCurve] = true;
-                } else if ( myCurve_start.IsEqual(theCurve_end, HEXA_EPSILON) ){
-                    if(MYDEBUG) MESSAGE("myCurve_start.IsEqual(theCurve_end, HEXA_EPSILON)");
-                    myCurve_way = true;
-                    myCurve_ways[theCurve] = false;
-                } else if ( myCurve_end.IsEqual(theCurve_end, HEXA_EPSILON) ){
-                    if(MYDEBUG) MESSAGE("myCurve_end.IsEqual(theCurve_end, HEXA_EPSILON)");
-                    myCurve_way = false;
-                    myCurve_ways[theCurve] = true;
-                } else if ( myCurve_end.IsEqual(theCurve_start, HEXA_EPSILON) ){
-                    if(MYDEBUG) MESSAGE("myCurve_end.IsEqual(theCurve_start, HEXA_EPSILON)");
-                    myCurve_way = false;
-                    myCurve_ways[theCurve] = false;
-                } else {
-                    if(MYDEBUG) MESSAGE("SOMETHING WRONG on edge association... Bad script?");
-//                     ASSERT(false);
-                    edge.dumpAsso();
-                    throw (SALOME_Exception(LOCALIZED("Edge association : check association parameters ( first, last ) between HEXA model and CAO")));
-                }
-
-            } else {
+               }
                 // it is not the first or last curve.
                 // ways are calculated between previous and new one.
-                if (   thePreviousCurve_end.IsEqual( theCurve_end, HEXA_EPSILON  )
-                    or thePreviousCurve_start.IsEqual( theCurve_start, HEXA_EPSILON ) ){
-                    myCurve_ways[theCurve] = !myCurve_ways[thePreviousCurve];// opposite WAY 
-                    if(MYDEBUG) MESSAGE("opposite WAY");
-                } else if (  thePreviousCurve_end.IsEqual( theCurve_start, HEXA_EPSILON )
-                          or thePreviousCurve_start.IsEqual( theCurve_end, HEXA_EPSILON ) ){
-                    myCurve_ways[theCurve] = myCurve_ways[thePreviousCurve];// same WAY 
-                    if(MYDEBUG) MESSAGE("same WAY");
-                } else {
-                    if(MYDEBUG) MESSAGE("SOMETHING WRONG on edge association... bad script?");
+            else
+               {
+               if (    p_curv_end.IsEqual( curv_end, HEXA_EPS  )
+                    || p_curv_start.IsEqual( curv_start, HEXA_EPS ) )
+                  {
+                  sens  = NOT myCurve_ways[thePreviousCurve];// opposite WAY
+                  }
+               else if (   p_curv_end.IsEqual( curv_start, HEXA_EPS )
+                        || p_curv_start.IsEqual( curv_end, HEXA_EPS ) )
+                  {
+                  sens  = myCurve_ways[thePreviousCurve];// same WAY
+                  }
+               else
+                  {
+                  if (MYDEBUG)
+                     MESSAGE("SOMETHING WRONG on edge association... bad script?");
 //                     ASSERT(false);
-                    throw (SALOME_Exception(LOCALIZED("Edge association : Check association parameters ( first, last ) between HEXA model and CAO")));
+                  edge.dumpAsso();
+                  throw (SALOME_Exception(LOCALIZED("Edge association : Check association parameters ( first, last ) between HEXA model and CAO")));
                 }
             }
 
-            myCurve_starts[theCurve]  = u_start;
-            myCurve_lengths[theCurve] = theCurve_length;
-            myCurve_length            += theCurve_length;
-            myCurve.push_back( theCurve );
+            myCurve_list.push_back( theCurve );
+            myCurve_ways   [theCurve] = sens;
+            myCurve_starts [theCurve] = u_start;
+            myCurve_lengths[theCurve] = curv_length;
+            myCurve_tot_len          += curv_length;
 
-            thePreviousCurve       = theCurve;
-            thePreviousCurve_start = theCurve_start;
-            thePreviousCurve_end   = theCurve_end;
-
-        }//if ( theCurveLength > 0 ){
-
+            thePreviousCurve  = theCurve;
+            p_curv_start = curv_start;
+            p_curv_end   = curv_end;
+           }//if ( theCurveLength > 0 )
     }// for
 
 
-    if ( myCurve_way == false ){
-        std::list< BRepAdaptor_Curve* > tmp( myCurve.size() );	
-	std::copy( myCurve.rbegin(), myCurve.rend(), tmp.begin() );
-	myCurve = tmp;
+    if ( NOT current_way ){
+        std::list< BRepAdaptor_Curve* > tmp( myCurve_list.size() );
+        std::copy( myCurve_list.rbegin(), myCurve_list.rend(), tmp.begin() );
+        myCurve_list = tmp;
     }
 
     if (MYDEBUG) {
-      MESSAGE("myCurve_way  was :"<<myCurve_way);
+      MESSAGE("current_way  was :" << current_way);
       MESSAGE("_buildMyCurve() : end  >>>>>>>>");
     }
 }
@@ -1391,12 +1324,12 @@ void SMESH_HexaBlocks::_buildMyCurve(
 
 
 
-gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve( 
+gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
     const double&                             myCurve_u,      //IN
     std::map< BRepAdaptor_Curve*, bool>&      myCurve_ways,   //IN
     std::map< BRepAdaptor_Curve*, double>&    myCurve_lengths,//IN
     std::map< BRepAdaptor_Curve*, double>&    myCurve_starts, //IN
-    std::list< BRepAdaptor_Curve* >&          myCurve,        //INOUT
+    std::list< BRepAdaptor_Curve* >&          myCurve_list,        //INOUT
     double&                                   myCurve_start ) //INOUT
 //     std::map< BRepAdaptor_Curve*, double>&  myCurve_firsts,
 //     std::map< BRepAdaptor_Curve*, double>&  myCurve_lasts,
@@ -1404,30 +1337,26 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
   if(MYDEBUG) MESSAGE("_getPtOnMyCurve() : : begin   <<<<<<");
   gp_Pnt ptOnMyCurve;
 
-  // looking for curve which contains parameter myCurve_u 
-  BRepAdaptor_Curve* curve      = myCurve.front();
+  // looking for curve which contains parameter myCurve_u
+  BRepAdaptor_Curve* curve      = myCurve_list.front();
   double            curve_start = myCurve_start;
   double            curve_end   = curve_start + myCurve_lengths[curve];
   double            curve_u;
   GCPnts_AbscissaPoint discret;
 
   if (MYDEBUG){
-    MESSAGE("looking for curve: c    = "<<myCurve_u);
+    MESSAGE("looking for curve               = "<<(long) curve);
+    MESSAGE("looking for curve: curve_u      = "<<myCurve_u);
     MESSAGE("looking for curve: curve_start  = "<<curve_start);
     MESSAGE("looking for curve: curve_end    = "<<curve_end);
     MESSAGE("looking for curve: curve_lenght = "<<myCurve_lengths[curve]);
-    MESSAGE("looking for curve: curve.size _lenght= "<<myCurve.size());
+    MESSAGE("looking for curve: curve.size _lenght= "<<myCurve_list.size());
   }
   while ( not ( (myCurve_u >= curve_start) and  (myCurve_u <= curve_end) ) ) {
-    // if (myCurve.size() == 0 )
-       // {
-       // PutData (myCurve.size());
-       // PutData (myCurve_u);
-       // }
 
-    ASSERT( myCurve.size() != 0 );
-    myCurve.pop_front();
-    curve       = myCurve.front();
+    ASSERT( myCurve_list.size() != 0 );
+    myCurve_list.pop_front();
+    curve       = myCurve_list.front();
     curve_start = curve_end;
     curve_end   = curve_start + myCurve_lengths[curve];
     if (MYDEBUG){
@@ -1441,13 +1370,11 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
 
   // compute point
   if ( myCurve_ways[curve] ){
-//     curve_u = myCurve_firsts[curve] + (myCurve_u - curve_start);
-//     discret = GCPnts_AbscissaPoint( *curve, (myCurve_u - curve_start), curve->FirstParameter() );
     discret = GCPnts_AbscissaPoint( *curve, (myCurve_u - curve_start), myCurve_starts[curve] );
   } else {
-//     discret = GCPnts_AbscissaPoint( *curve, myCurve_lengths[curve]- (myCurve_u - curve_start), curve->FirstParameter() );
     discret = GCPnts_AbscissaPoint( *curve, myCurve_lengths[curve]- (myCurve_u - curve_start), myCurve_starts[curve] );
   }
+  // PutData (discret);
   ASSERT(discret.IsDone());
   curve_u = discret.Parameter();
   ptOnMyCurve = curve->Value( curve_u );
@@ -1464,14 +1391,11 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
 
 
 
-
-
-
 void SMESH_HexaBlocks::_nodeInterpolationUV(double u, double v,
     SMDS_MeshNode* Pg, SMDS_MeshNode* Pd, SMDS_MeshNode* Ph, SMDS_MeshNode* Pb,
     SMDS_MeshNode* S1, SMDS_MeshNode* S2, SMDS_MeshNode* S3, SMDS_MeshNode* S4,
     double& xOut, double& yOut, double& zOut )
-{ 
+{
   if (MYDEBUG){
     MESSAGE("_nodeInterpolationUV() IN:");
     MESSAGE("u ( "<< u <<" )");
@@ -1497,29 +1421,26 @@ void SMESH_HexaBlocks::_nodeInterpolationUV(double u, double v,
   }
 }
 
-
-TopoDS_Shape SMESH_HexaBlocks::_getShapeOrCompound( const std::vector<HEXA_NS::Shape*>& shapesIn)
+// =========================================================== getFaceShapes
+TopoDS_Shape SMESH_HexaBlocks::getFaceShapes (Hex::Quad& quad)
 {
-  ASSERT( shapesIn.size()!=0 );
+   int             nbass = quad.countAssociation ();
+   Hex::FaceShape* face  = quad.getAssociation (0);
+   if (nbass==1)
+       return face->getShape ();
 
-  if (shapesIn.size() == 1) {
-    HEXA_NS::Shape* assoc = shapesIn.front(); 
-    string strBrep = assoc->getBrep();
-    return string2shape( strBrep );
-  } else {
-    TopoDS_Compound aCompound;
-    BRep_Builder aBuilder;
-    aBuilder.MakeCompound( aCompound );
+   TopoDS_Compound compound;
+   BRep_Builder    builder;
+   builder.MakeCompound (compound);
 
-    for ( std::vector <HEXA_NS::Shape*> ::const_iterator assoc = shapesIn.begin();
-          assoc != shapesIn.end();
-          ++assoc ){
-        string strBrep     = (*assoc)->getBrep();
-        TopoDS_Shape shape = string2shape( strBrep );
-        aBuilder.Add( aCompound, shape );
-    }
-    return aCompound;
-  }
+   for (int nro=0 ; nro < nbass ; nro++)
+       {
+       face = quad.getAssociation (nro);
+       TopoDS_Shape shape = face->getShape ();
+       builder.Add (compound, shape);
+       }
+
+   return compound;
 }
 
 
@@ -1531,7 +1452,7 @@ inline double carre (double val)
 // ================================================== dist2
 inline double dist2 (const gp_Pnt& pt1, const gp_Pnt& pt2)
 {
-   double dist = carre (pt2.X()-pt1.X()) + carre (pt2.Y()-pt1.Y()) 
+   double dist = carre (pt2.X()-pt1.X()) + carre (pt2.Y()-pt1.Y())
                                          + carre (pt2.Z()-pt1.Z());
    return dist;
 }
@@ -1555,8 +1476,7 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
 //   inter.Load(S, tol);
   inter.Perform(li, s, e);//inter.PerformNearest(li, s, e);
 
-/**************************************************************  Abu 2011-11-04 */
-  /// if ( inter.IsDone() && (inter.NbPnt()==1) ) {
+/***********************************************  Abu 2011-11-04 */
   if ( inter.IsDone() )
      {
      result = inter.Pnt(1);//first
@@ -1574,7 +1494,7 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
                }
             }
         }
-/**************************************************************  Abu 2011-11-04 (fin) */
+/**********************************************  Abu 2011-11-04 (getEnd()) */
     if (MYDEBUG){
       MESSAGE("_intersect() : OK");
       for ( int i=1; i <= inter.NbPnt(); ++i ){
@@ -1650,7 +1570,7 @@ void SMESH_HexaBlocks::_searchInitialQuadWay( HEXA_NS::Quad* q, HEXA_NS::Vertex*
 
   gp_Vec AB( pA, pB );
   gp_Vec AC( pA, pC );
-  gp_Vec normP = AB^AC; 
+  gp_Vec normP = AB^AC;
   gp_Dir dirP( normP );
 
   // building plane for point projection
@@ -1675,7 +1595,7 @@ void SMESH_HexaBlocks::_searchInitialQuadWay( HEXA_NS::Quad* q, HEXA_NS::Vertex*
   if ( CC.IsOpposite(DD, HEXA_QUAD_WAY) ) return;
 
   // ok, give the input quad the good orientation by
-  // setting 2 vertex 
+  // setting 2 vertex
   if ( !dirP.IsOpposite(AA, HEXA_QUAD_WAY) ) { //OK
       v0 = qA; v1 = qB;
   } else {
@@ -1735,8 +1655,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::HexaCell:
         {
             HEXA_NS::Hexa* h = reinterpret_cast<HEXA_NS::Hexa*>(grHexElt);
-//             HEXA_NS::Hexa* h = dynamic_cast<HEXA_NS::Hexa*>(grHexElt);
-//             ASSERT(h);
             if ( _volumesOnHexa.count(h)>0 ){
               SMESHVolumes volumes = _volumesOnHexa[h];
               for ( SMESHVolumes::iterator aVolume = volumes.begin(); aVolume != volumes.end(); ++aVolume ){
@@ -1750,8 +1668,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::QuadCell:
         {
             HEXA_NS::Quad* q = reinterpret_cast<HEXA_NS::Quad*>(grHexElt);
-//             HEXA_NS::Quad* q = dynamic_cast<HEXA_NS::Quad*>(grHexElt);
-//             ASSERT(q);
             if ( _facesOnQuad.count(q)>0 ){
               SMESHFaces faces = _facesOnQuad[q];
               for ( SMESHFaces::iterator aFace = faces.begin(); aFace != faces.end(); ++aFace ){
@@ -1765,8 +1681,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::EdgeCell:
         {
             HEXA_NS::Edge* e = reinterpret_cast<HEXA_NS::Edge*>(grHexElt);
-//             HEXA_NS::Edge* e = dynamic_cast<HEXA_NS::Edge*>(grHexElt);
-//             ASSERT(e);
             if ( _edgesOnEdge.count(e)>0 ){
               SMESHEdges edges = _edgesOnEdge[e];
               for ( SMESHEdges::iterator anEdge = edges.begin(); anEdge != edges.end(); ++anEdge ){
@@ -1777,17 +1691,15 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
             }
         }
         break;
-        case HEXA_NS::HexaNode: 
+        case HEXA_NS::HexaNode:
         {
             HEXA_NS::Hexa* h = reinterpret_cast<HEXA_NS::Hexa*>(grHexElt);
-//             HEXA_NS::Hexa* h = dynamic_cast<HEXA_NS::Hexa*>(grHexElt);
-//             ASSERT(h);
             if ( _volumesOnHexa.count(h)>0 ){
               SMESHVolumes volumes = _volumesOnHexa[h];
               for ( SMESHVolumes::iterator aVolume = volumes.begin(); aVolume != volumes.end(); ++aVolume ){
                 SMDS_ElemIteratorPtr aNodeIter = (*aVolume)->nodesIterator();
                 while( aNodeIter->more() ){
-                  const SMDS_MeshNode* aNode = 
+                  const SMDS_MeshNode* aNode =
                     dynamic_cast<const SMDS_MeshNode*>( aNodeIter->next() );
                   if ( aNode ){
                       aGrEltIDs.push_back(aNode);
@@ -1802,8 +1714,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::QuadNode:
         {
             HEXA_NS::Quad* q = reinterpret_cast<HEXA_NS::Quad*>(grHexElt);
-//             HEXA_NS::Quad* q = dynamic_cast<HEXA_NS::Quad*>(grHexElt);
-//             ASSERT(q);
             if ( _quadNodes.count(q)>0 ){
               ArrayOfSMESHNodes nodesOnQuad = _quadNodes[q];
               for ( ArrayOfSMESHNodes::iterator nodes = nodesOnQuad.begin(); nodes != nodesOnQuad.end(); ++nodes){
@@ -1819,8 +1729,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::EdgeNode:
         {
             HEXA_NS::Edge* e = reinterpret_cast<HEXA_NS::Edge*>(grHexElt);
-//             HEXA_NS::Edge* e = dynamic_cast<HEXA_NS::Edge*>(grHexElt);
-//             ASSERT(e);
             if ( _nodesOnEdge.count(e)>0 ){
               SMESHNodes nodes = _nodesOnEdge[e];
               for ( SMESHNodes::iterator aNode = nodes.begin(); aNode != nodes.end(); ++aNode){
@@ -1834,8 +1742,6 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
         case HEXA_NS::VertexNode:
         {
           HEXA_NS::Vertex* v = reinterpret_cast<HEXA_NS::Vertex*>(grHexElt);
-//             HEXA_NS::Vertex* v = dynamic_cast<HEXA_NS::Vertex*>(grHexElt);
-//             ASSERT(v);
             if ( _node.count(v)>0 ){
               aGrEltIDs.push_back(_node[v]);
             } else {
@@ -1856,92 +1762,3 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
 
   if(MYDEBUG) MESSAGE("_fillGroup() : end  >>>>>>>>");
 }
-
-
-
-
-
-// not used, for backup purpose only:
-void SMESH_HexaBlocks::_getCurve( const std::vector<HEXA_NS::Shape*>& shapesIn,
-  Handle_Geom_Curve& curveOut, double& curveFirstOut, double& curveLastOut )
-{
-//   std::cout<<"------------------- _getCurve ------------ "<<std::endl;
-  GeomConvert_CompCurveToBSplineCurve* gen = NULL;
-
-  double curvesLenght = 0.;
-  double curvesFirst = shapesIn.front()->debut;
-  double curvesLast  = shapesIn.back()->fin;
-
-  for ( std::vector <HEXA_NS::Shape*> ::const_iterator assoc = shapesIn.begin();
-        assoc != shapesIn.end();
-        ++assoc ){
-      string strBrep     = (*assoc)->getBrep();
-      TopoDS_Shape shape = string2shape( strBrep );
-      TopoDS_Edge Edge   = TopoDS::Edge(shape);
-      double f, l;
-      Handle(Geom_Curve) curve = BRep_Tool::Curve(Edge, f, l);
-      curvesLenght += l-f;
-      Handle(Geom_BoundedCurve) bCurve = Handle(Geom_BoundedCurve)::DownCast(curve);
-      if ( gen == NULL ){
-        gen = new GeomConvert_CompCurveToBSplineCurve(bCurve);
-      } else {
-        bool bb=gen->Add(bCurve, Precision::Confusion(), Standard_True, Standard_False, 1);
-        ASSERT(bb);
-      }
-  }
-  curveFirstOut = curvesFirst/curvesLenght;
-  curveLastOut  = curvesLenght - (1.-curvesLast)/curvesLenght;
-  curveOut      = gen->BSplineCurve();
-
-  std::cout<<"curvesFirst -> "<<curvesFirst<<std::endl;
-  std::cout<<"curvesLast  -> "<<curvesLast<<std::endl;
-  std::cout<<"curvesLenght  -> "<<curvesLenght<<std::endl;
-  std::cout<<"curveFirstOut -> "<<curveFirstOut<<std::endl;
-  std::cout<<"curveLastOut  -> "<<curveLastOut<<std::endl;
-
-}
-
-
-
-
-
-// bool SMESH_HexaBlocks::_areSame(double a, double b)
-// {
-//   return fabs(a - b) < HEXA_EPSILON;
-// }
-// //     MESSAGE("Angular() :" << dir2.IsOpposite(dir1, Precision::Angular()));
-// //   ASSERT( dir2.IsParallel(dir1, HEXA_QUAD_WAY) );
-// //   bool test2 = norm2.IsOpposite(norm1, HEXA_QUAD_WAY2) == norm3.IsOpposite(norm1, HEXA_QUAD_WAY2);
-// //       way = norm1.IsOpposite(norm3.Reversed(), HEXA_QUAD_WAY2);
-//   gp_Pnt p( n->X(), n->Y(), n->Z() );
-//   gp_Pnt ptOnPlane;
-//   gp_Pnt ptOnSurface;
-//   gp_Pnt ptOnPlaneOrSurface;
-// //   gp_Vec norm2(p1, p);
-//   TopoDS_Shape  planeOrSurface;
-// 
-// 
-//   gp_Pln        pln(p1, dir1);
-//   TopoDS_Shape  shapePln = BRepBuilderAPI_MakeFace(pln).Face();
-//   ptOnPlane = _intersect( p, a1, b1, shapePln );
-//   ptOnPlaneOrSurface = ptOnPlane;
-// 
-// 
-// //   if ( assoc != NULL ){
-// //     MESSAGE("_computeQuadWay with assoc");
-//   for( int i=0; i < h->countEdge(); ++i  ){ 
-//     HEXA_NS::Edge* e = h->getUsedEdge(i);
-//     if ( e->definedBy(v1,v2) ){
-//       const std::vector <HEXA_NS::Shape*> assocs = e->getAssociations();
-//       if ( assocs.size() != 0 ){
-//         HEXA_NS::Shape* assoc = assocs[0]; //CS_TODO
-//         string        theBrep  = assoc->getBrep();
-//         TopoDS_Shape  theShape = string2shape( theBrep );
-//         ptOnSurface = _intersect( p, a1, b1, theShape );
-//         if ( !ptOnSurface.IsEqual(p, HEXA_EPSILON) ){
-//           ptOnPlaneOrSurface = ptOnSurface;
-//         } 
-//       }
-//     }
-//   }
-// 

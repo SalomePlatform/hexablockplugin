@@ -17,7 +17,7 @@
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 //  File   : SMESH_HexaBlocks.hxx
-//  Author : 
+//  Author :
 //  Module : SMESH
 //
 #ifndef _SMESH_HexaBlocks_HeaderFile
@@ -38,6 +38,7 @@
 #include "SMESH_Mesh.hxx"
 #include "SMESH_Group.hxx"
 #include "hexa_base.hxx" // from HexaBlocks
+#include "HexFaceShape.hxx" // from HexaBlocks
 
 #ifndef _Standard_Real_HeaderFile
 #include <Standard_Real.hxx>
@@ -78,11 +79,6 @@ public:
   //  Vertex computing
   // --------------------------------------------------------------
   bool computeVertex( HEXA_NS::Vertex& vertex );
-  // Association solving
-  bool computeVertexByAssoc( HEXA_NS::Vertex& vertex );
-  // Automatic solving
-  bool computeVertexByModel( HEXA_NS::Vertex& vertex );
-
 
   // --------------------------------------------------------------
   //  Edge computing
@@ -90,7 +86,7 @@ public:
   bool computeEdge( HEXA_NS::Edge& edge, HEXA_NS::Law& law);
   // Association solving
   bool computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& law);
-  
+
   // Automatic solving
   bool computeEdgeByShortestWire( HEXA_NS::Edge& edge, HEXA_NS::Law& law);
   bool computeEdgeByPlanWire( HEXA_NS::Edge& edge, HEXA_NS::Law& law);
@@ -133,7 +129,6 @@ private:
   double _edgeLength(const TopoDS_Edge & E);
 
   void _buildMyCurve(
-      const std::vector <HEXA_NS::Shape*>& 	associations,   //IN
       const gp_Pnt&                             myCurve_start,  //IN
       const gp_Pnt&				myCurve_end,    //IN
       std::list< BRepAdaptor_Curve* >& 	        myCurve,        //INOUT
@@ -143,7 +138,7 @@ private:
       std::map< BRepAdaptor_Curve*, double>&    myCurve_starts,   //INOUT
       HEXA_NS::Edge&                            edge);  // For diagnostic
 
-  gp_Pnt _getPtOnMyCurve( 
+  gp_Pnt _getPtOnMyCurve(
       const double&                           myCurve_u,      //IN
       std::map< BRepAdaptor_Curve*, bool>&    myCurve_ways,   //IN
       std::map< BRepAdaptor_Curve*, double>&  myCurve_lengths,//IN
@@ -157,7 +152,8 @@ private:
     SMDS_MeshNode* S0, SMDS_MeshNode* S1, SMDS_MeshNode* S2, SMDS_MeshNode* S3,
     double& xOut, double& yOut, double& zOut );
 
-  TopoDS_Shape _getShapeOrCompound( const std::vector<HEXA_NS::Shape*>& shapesIn );
+  // TopoDS_Shape _getShapeOrCompound( const std::vector<HEXA_NS::Shape*>& shapesIn );
+  TopoDS_Shape getFaceShapes (Hex::Quad& quad);
 
   gp_Pnt _intersect( const gp_Pnt& Pt,
                      const gp_Vec& u, const gp_Vec& v,
@@ -206,11 +202,6 @@ private:
   int _total;
   int _found;
   int _notFound;
-
-  // not used, for backup purpose only:
-  void _getCurve( const std::vector<HEXA_NS::Shape*>& shapesIn,
-                  Handle_Geom_Curve& curveOut, double& curveFirstOut, double& curveLastOut );
-//   bool computeEdgeByAssoc2( HEXA_NS::Edge& edge, HEXA_NS::Law& law); // alternative method
 };
 
 
