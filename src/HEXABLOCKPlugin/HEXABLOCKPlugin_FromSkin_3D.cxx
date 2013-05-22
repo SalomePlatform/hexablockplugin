@@ -27,6 +27,7 @@
 #include "SMDS_VolumeTool.hxx"
 #include "SMESH_Block.hxx"
 #include "SMESH_MesherHelper.hxx"
+#include "SMESH_MeshAlgos.hxx"
 
 #include <gp_Ax2.hxx>
 
@@ -641,8 +642,8 @@ namespace
       const SMDS_MeshNode* n1down = side.getNode( 0, y-1 );
       const SMDS_MeshNode* n2down = side.getNode( 1, y-1 );
       avoidSet.clear(); avoidSet.insert( firstQuad );
-      firstQuad = SMESH_MeshEditor::FindFaceInSet( n1down, n2down, emptySet, avoidSet,
-                                                   &i1down, &i2down);
+      firstQuad = SMESH_MeshAlgos::FindFaceInSet( n1down, n2down, emptySet, avoidSet,
+                                                  &i1down, &i2down);
       if ( !isQuadrangle( firstQuad ))
         return BAD_MESH_ERR;
 
@@ -654,8 +655,8 @@ namespace
       x = 1; 
       while ( ++x < nbX )
       {
-        const SMDS_MeshElement* quad = SMESH_MeshEditor::FindFaceInSet( n2up, n2down, emptySet,
-                                                                        avoidSet, &i2up, &i2down);
+        const SMDS_MeshElement* quad = SMESH_MeshAlgos::FindFaceInSet( n2up, n2down, emptySet,
+                                                                       avoidSet, &i2up, &i2down);
         if ( !isQuadrangle( quad ))
           return BAD_MESH_ERR;
 
@@ -948,7 +949,7 @@ namespace
     while ( !isCornerNode( n2 ) )
     {
       avoidSet.clear(); avoidSet.insert( quad );
-      quad = SMESH_MeshEditor::FindFaceInSet( n1, n2, emptySet, avoidSet, &i1, &i2 );
+      quad = SMESH_MeshAlgos::FindFaceInSet( n1, n2, emptySet, avoidSet, &i1, &i2 );
       if ( !isQuadrangle( quad ))
         return BAD_MESH_ERR;
 
