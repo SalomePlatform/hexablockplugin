@@ -55,7 +55,6 @@ libHEXABLOCKPluginGUI_la_LDFLAGS  = \
 	../../idl/libSalomeIDLHEXABLOCKPLUGIN.la \
 	$(QT_LIBS) \
 	$(KERNEL_LDFLAGS) -lSALOMELocalTrace \
-	$(HEXABLOCK_LDFLAGS) -lSalomeIDLHEXABLOCK \
 	$(MED_LDFLAGS) -lSalomeIDLMED \
 	$(SMESH_LDFLAGS) -lSMESH \
 	$(GUI_LDFLAGS) -lsuit -lqtx -lSalomeApp \

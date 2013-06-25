@@ -21,7 +21,6 @@
 //  File   : HEXABLOCKPlugin.cxx
 //  Author : Lioka RAZAFINDRAZAKA (CEA)
 //  Module : SMESH
-//  $Header$
 //
 #include "SMESH_Hypothesis_i.hxx"
 

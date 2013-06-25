@@ -29,7 +29,7 @@
 
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(HEXABLOCKPlugin_Algorithm)
-#include CORBA_CLIENT_HEADER(Document)
+//   #include CORBA_CLIENT_HEADER(Document)
 
 #include "SMESH_Hypothesis_i.hxx"
 #include "HEXABLOCKPlugin_Hypothesis.hxx"
@@ -53,8 +53,8 @@ class HEXABLOCKPLUGIN_EXPORT HEXABLOCKPlugin_Hypothesis_i:
     /*!
      * Define the document to be meshed, mandatory
      */
-    HEXABLOCK_ORB::Document_ptr GetDocument();
-    void SetDocument(HEXABLOCK_ORB::Document_ptr doc);
+    char* GetDocument ();
+    void  SetDocument (const char* doc);
 
     /*!
      * To define the hight dimension to generated: 3 = hexas, 2 = quads, 1 = segments, 0 = nodes

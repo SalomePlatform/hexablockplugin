@@ -45,8 +45,12 @@ public:
   /*!
    * Define the document to be meshed, mandatory
    */
-  void SetDocument(HEXA_NS::Document* doc);
   HEXA_NS::Document* GetDocument() const;
+
+  // void SetDocument(HEXA_NS::Document* doc); .. replaced by :
+  void  SetDocument (cpchar name);
+  void  SetXmlFlow  (cpchar xml);
+  char* GetXmlFlow  () const;
 
   /*!
    * To define the hight dimension to generated: 3 = hexas, 2 = quads, 1 = segments, 0 = nodes
@@ -71,8 +75,9 @@ public:
   virtual bool SetParametersByDefaults(const TDefaults& dflts, const SMESH_Mesh* theMesh=0);
 
 private:
-  HEXA_NS::Document* _document;
-  int _dimension;
+  HEXA_NS::Hex*      hexa_root;
+  HEXA_NS::Document* hyp_document;
+  int                hyp_dimension;
 };
 
 

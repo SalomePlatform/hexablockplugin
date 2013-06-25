@@ -27,7 +27,6 @@
 #include "SALOME_Exception.idl"
 #include "SMESH_Hypothesis.idl"
 
-#include "Document.idl"
 /*!
  * HEXABLOCKPlugin: interfaces to HEXABLOCK related hypotheses and algorithms
  */
@@ -49,8 +48,8 @@ module HEXABLOCKPlugin
     /*!
      * Define the document to be meshed, mandatory
      */
-    void SetDocument(in HEXABLOCK_ORB::Document doc);
-    HEXABLOCK_ORB::Document GetDocument();
+    void SetDocument(in string doc);
+    string GetDocument();
 
     /*!
      * To define the hight dimension to generated: 3 = hexas, 2 = quads, 1 = segments, 0 = nodes

@@ -25,9 +25,10 @@
 #include <SMESH_PythonDump.hxx>
 #include <SMESH_Mesh_i.hxx>
 
-#include "HEXABLOCK.hxx"
+// #include "HEXABLOCK.hxx"
 #include "HEXABLOCKPlugin_Hypothesis_i.hxx"
-#include "HexDocument_impl.hxx"
+// #include "HexDocument_impl.hxx"    // Perime
+#include "HexDocument.hxx"
 
 #include <Utils_CorbaException.hxx>
 #include <utilities.h>
@@ -43,8 +44,8 @@ static int MYDEBUG = 0;
 //=======================================================================
 
 HEXABLOCKPlugin_Hypothesis_i::HEXABLOCKPlugin_Hypothesis_i (PortableServer::POA_ptr thePOA,
-                                                    int                     theStudyId,
-                                                    ::SMESH_Gen*            theGenImpl)
+                                  int             theStudyId,
+                                  ::SMESH_Gen*    theGenImpl)
   : SALOME::GenericObj_i( thePOA ), 
     SMESH_Hypothesis_i( thePOA )
 {
@@ -91,22 +92,20 @@ CORBA::Boolean HEXABLOCKPlugin_Hypothesis_i::IsDimSupported( SMESH::Dimension ty
  * Define the document to be meshed, mandatory
  */
 //================================================================================
-
-HEXABLOCK_ORB::Document_ptr HEXABLOCKPlugin_Hypothesis_i::GetDocument() {
-  ASSERT(myBaseImpl);
-  HEXA_NS::Document* d = this->GetImpl()->GetDocument();
-  Document_impl* servantCorba = new Document_impl(_poa, d);
-  HEXABLOCK_ORB::Document_ptr result = servantCorba->_this();
-  return result;
+// ================================================================= GetDocument
+char* HEXABLOCKPlugin_Hypothesis_i::GetDocument ()
+{
+  ASSERT (myBaseImpl);
+  cpchar xml = this->GetImpl()->GetXmlFlow ();
+  return CORBA::string_dup (xml);
 }
 
-void HEXABLOCKPlugin_Hypothesis_i::SetDocument(HEXABLOCK_ORB::Document_ptr doc) {
-  Document_impl* docServant = ::DownCast<Document_impl*>(doc);
-  if ( docServant ) {
-    HEXA_NS::Document* d = docServant->GetImpl();
-    ASSERT(myBaseImpl);
-    this->GetImpl()->SetDocument(d);
-  }
+// ================================================================= SetDocument
+void HEXABLOCKPlugin_Hypothesis_i::SetDocument (const char* name)
+{
+    ASSERT (myBaseImpl);
+    // this->GetImpl()->SetXmlFlow (xml);
+    this->GetImpl()->SetDocument (name);
 }
 
 //================================================================================

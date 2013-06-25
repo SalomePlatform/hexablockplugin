@@ -97,7 +97,7 @@ static int  MYDEBUG = 0;
 
 
 static double HEXA_EPS      = 1.0e-3; //1E-3;
-static double HEXA_QUAD_WAY = PI/4.; //3.*PI/8.;
+static double HEXA_QUAD_WAY = M_PI/4.; //3.*PI/8.;
 
 // ============================================================ string2shape
 TopoDS_Shape string2shape( const string& brep )

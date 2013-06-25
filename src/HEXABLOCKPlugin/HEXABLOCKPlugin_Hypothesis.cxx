@@ -24,18 +24,23 @@
 //=============================================================================
 //
 #include "HEXABLOCKPlugin_Hypothesis.hxx"
+#include "Hex.hxx"
 
 //=======================================================================
 //function : HEXABLOCKPlugin_Hypothesis
 //=======================================================================
 
 HEXABLOCKPlugin_Hypothesis::HEXABLOCKPlugin_Hypothesis(int hypId, int studyId, SMESH_Gen * gen)
-  : SMESH_Hypothesis(hypId, studyId, gen),
-  _document(NULL),
-  _dimension(3)
+  : SMESH_Hypothesis(hypId, studyId, gen)
 {
-  _name = "HEXABLOCK_Parameters";
-  _param_algo_dim = 3;
+   hexa_root     = HEXA_NS::Hex::getInstance ();
+   hyp_document  = NULL;
+   hyp_dimension = 3;
+
+   // PutData (hexa_root->countDocument ());
+
+   _name = "HEXABLOCK_Parameters";
+   _param_algo_dim = 3;
 }
 
 //=======================================================================
@@ -44,16 +49,25 @@ HEXABLOCKPlugin_Hypothesis::HEXABLOCKPlugin_Hypothesis(int hypId, int studyId, S
 
 HEXA_NS::Document* HEXABLOCKPlugin_Hypothesis::GetDocument() const
 {
-  return(_document);
+  return hyp_document;
+}
+
+//=======================================================================
+//function : SetXmlFlow
+//=======================================================================
+void HEXABLOCKPlugin_Hypothesis::SetXmlFlow (cpchar xml)
+{
+   if (hyp_document ==NULL)
+       hyp_document  = hexa_root->addDocument ("tobe_meshed");
+   hyp_document->setXml (xml); 
 }
 
 //=======================================================================
 //function : SetDocument
 //=======================================================================
-
-void HEXABLOCKPlugin_Hypothesis::SetDocument(HEXA_NS::Document* doc)
+void HEXABLOCKPlugin_Hypothesis::SetDocument (cpchar name)
 {
-  _document = doc;
+   hyp_document = hexa_root->findDocument (name);
 }
 
 //=======================================================================
@@ -62,7 +76,7 @@ void HEXABLOCKPlugin_Hypothesis::SetDocument(HEXA_NS::Document* doc)
 
 int HEXABLOCKPlugin_Hypothesis::GetDimension() const
 {
-  return(_dimension);
+   return hyp_dimension;
 }
 
 //=======================================================================
@@ -71,7 +85,7 @@ int HEXABLOCKPlugin_Hypothesis::GetDimension() const
 
 void HEXABLOCKPlugin_Hypothesis::SetDimension(int dim)
 {
-  _dimension = dim;
+   hyp_dimension = dim;
 }
 
 //=======================================================================
@@ -80,8 +94,8 @@ void HEXABLOCKPlugin_Hypothesis::SetDimension(int dim)
 
 std::ostream & HEXABLOCKPlugin_Hypothesis::SaveTo(std::ostream & save)
 {
-//save << _document->getXML() << " ";
-  save <<_dimension           << " ";
+//save << hyp_document->getXML() << " ";
+  save << hyp_dimension           << " ";
 
   return save;
 }
@@ -98,13 +112,13 @@ std::istream & HEXABLOCKPlugin_Hypothesis::LoadFrom(std::istream & load)
 //     char* str;
 //     isOK = (load >> str);
 //     if (isOK)
-//         _document = xml_2_doc(str);
+//         hyp_document = xml_2_doc(str);
 //     else
 //         load.clear(ios::badbit | load.rdstate());
     
     isOK = (load >> i);
     if (isOK)
-        _dimension = i;
+        hyp_dimension = i;
     else
         load.clear(ios::badbit | load.rdstate());
     
