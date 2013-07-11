@@ -52,14 +52,6 @@ if test ! -d "${HEXABLOCK_ROOT_DIR}"; then
 fi
 
 ########################################################################
-# Test if the MED_ROOT_DIR is set correctly
-
-if test ! -d "${MED_ROOT_DIR}"; then
-    echo "failed : MED_ROOT_DIR variable is not correct !"
-    exit
-fi
-
-########################################################################
 # Test if the SMESH_ROOT_DIR is set correctly
 
 if test ! -d "${SMESH_ROOT_DIR}"; then
@@ -85,14 +77,12 @@ if test -d "${GUI_ROOT_DIR}"; then
   aclocal -I adm_local/unix/config_files \
           -I ${KERNEL_ROOT_DIR}/salome_adm/unix/config_files \
           -I ${GUI_ROOT_DIR}/adm_local/unix/config_files \
-          -I ${MED_ROOT_DIR}/adm_local/unix/config_files \
           -I ${GEOM_ROOT_DIR}/adm_local/unix/config_files \
           -I ${HEXABLOCK_ROOT_DIR}/adm_local/unix/config_files \
           -I ${SMESH_ROOT_DIR}/adm_local/unix/config_files || exit 1
 else
   aclocal -I adm_local/unix/config_files \
           -I ${KERNEL_ROOT_DIR}/salome_adm/unix/config_files \
-          -I ${MED_ROOT_DIR}/adm_local/unix/config_files \
           -I ${GEOM_ROOT_DIR}/adm_local/unix/config_files \
           -I ${HEXABLOCK_ROOT_DIR}/adm_local/unix/config_files \
           -I ${SMESH_ROOT_DIR}/adm_local/unix/config_files || exit 1

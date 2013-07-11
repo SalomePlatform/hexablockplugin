@@ -333,14 +333,6 @@ CHECK_GEOM
 
 echo
 echo ---------------------------------------------
-echo Testing Med
-echo ---------------------------------------------
-echo
-
-CHECK_MED
-
-echo
-echo ---------------------------------------------
 echo Testing SMesh
 echo ---------------------------------------------
 echo
@@ -363,11 +355,11 @@ echo
 
 echo Configure
 if test "${gui_ok}" = "yes"; then
-  variables="cc_ok boost_ok threads_ok omniORB_ok occ_ok doxygen_ok OpenGL_ok qt_ok vtk_ok Kernel_ok gui_ok Geom_ok Med_ok SMesh_ok HEXABLOCK_ok"
+  variables="cc_ok boost_ok threads_ok omniORB_ok occ_ok doxygen_ok OpenGL_ok qt_ok vtk_ok Kernel_ok gui_ok Geom_ok SMesh_ok HEXABLOCK_ok"
 elif test "${SalomeGUI_need}" != "no"; then
-  variables="cc_ok boost_ok threads_ok omniORB_ok occ_ok doxygen_ok Kernel_ok gui_ok Geom_ok Med_ok SMesh_ok HEXABLOCK_ok"
+  variables="cc_ok boost_ok threads_ok omniORB_ok occ_ok doxygen_ok Kernel_ok gui_ok Geom_ok SMesh_ok HEXABLOCK_ok"
 else
-  variables="cc_ok boost_ok threads_ok omniORB_ok occ_ok doxygen_ok Kernel_ok Geom_ok Med_ok SMesh_ok HEXABLOCK_ok"
+  variables="cc_ok boost_ok threads_ok omniORB_ok occ_ok doxygen_ok Kernel_ok Geom_ok SMesh_ok HEXABLOCK_ok"
 fi
 
 for var in $variables

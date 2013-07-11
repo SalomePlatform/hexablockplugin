@@ -42,7 +42,6 @@ libHEXABLOCKPluginGUI_la_CPPFLAGS =  \
 	$(GUI_CXXFLAGS)       \
 	$(GEOM_CXXFLAGS)      \
 	$(HEXABLOCK_CXXFLAGS) \
-	$(MED_CXXFLAGS)       \
 	$(SMESH_CXXFLAGS)     \
 	$(BOOST_CPPFLAGS)     \
 	$(CORBA_CXXFLAGS)     \
@@ -55,7 +54,6 @@ libHEXABLOCKPluginGUI_la_LDFLAGS  = \
 	../../idl/libSalomeIDLHEXABLOCKPLUGIN.la \
 	$(QT_LIBS) \
 	$(KERNEL_LDFLAGS) -lSALOMELocalTrace \
-	$(MED_LDFLAGS) -lSalomeIDLMED \
 	$(SMESH_LDFLAGS) -lSMESH \
 	$(GUI_LDFLAGS) -lsuit -lqtx -lSalomeApp \
 	$(CAS_KERNEL)
