@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2013  CEA/DEN, EDF R&D
+# Copyright (C) 2012-2013  CEA/DEN, EDF R&D, OPEN CASCADE
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,18 +17,25 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-# -* Makefile *- 
-# Author : Lioka RAZAFINDRAZAKA (CEA)
-# Modified by : Alexander BORODIN (OCN) - autotools usage
-# Module : HEXABLOCKPLUGIN
-# Date : 2010/11/08
-#
-include $(top_srcdir)/adm_local/unix/make_common_starter.am
+##
+# Common packages
+##
+SET(SUBDIRS_COMMON
+  HEXABLOCKPlugin
+)
 
-SUBDIRS = HEXABLOCKPlugin
+IF(SALOME_BUILD_GUI)
+  SET(SUBDIRS_ENABLE_GUI
+    GUI
+  )
+ENDIF(SALOME_BUILD_GUI)
 
-if HEXABLOCKPLUGIN_ENABLE_GUI
-  SUBDIRS += GUI
-endif
+SET(SUBDIRS
+  ${SUBDIRS_COMMON}
+  ${SUBDIRS_ENABLE_GUI}
+)
 
-DIST_SUBDIRS = HEXABLOCKPlugin GUI
+FOREACH(dir ${SUBDIRS})
+ ADD_SUBDIRECTORY(${dir})
+ENDFOREACH(dir ${SUBDIRS})
+            

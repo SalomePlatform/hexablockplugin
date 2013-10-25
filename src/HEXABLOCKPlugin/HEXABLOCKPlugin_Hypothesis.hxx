@@ -50,7 +50,7 @@ public:
   // void SetDocument(HEXA_NS::Document* doc); .. replaced by :
   void  SetDocument (cpchar name);
   void  SetXmlFlow  (cpchar xml);
-  char* GetXmlFlow  () const;
+  cpchar GetXmlFlow  () const;
 
   /*!
    * To define the hight dimension to generated: 3 = hexas, 2 = quads, 1 = segments, 0 = nodes

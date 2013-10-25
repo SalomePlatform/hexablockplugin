@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2013  CEA/DEN, EDF R&D
+# Copyright (C) 2007-2013  CEA/DEN, EDF R&D, OPEN CASCADE
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,15 +16,16 @@
 #
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
-
-# -* Makefile *- 
-# Author : Lioka RAZAFINDRAZAKA (CEA)
-# Module : HEXABLOCKPLUGIN
 #
-include $(top_srcdir)/adm_local/unix/make_common_starter.am
 
-# non-distributed files 
-nodist_salomescript_DATA = VERSION
+IF(NOT SalomeHEXABLOCKPLUGIN_FIND_QUIETLY)
+  MESSAGE(STATUS "Looking for Salome HEXABLOCKPLUGIN ...")
+ENDIF()
 
-# distributed files
-dist_salomescript_SCRIPTS =
+SET(CMAKE_PREFIX_PATH "${HEXABLOCKPLUGIN_ROOT_DIR}")
+
+SALOME_FIND_PACKAGE(SalomeHEXABLOCKPLUGIN SalomeHEXABLOCKPLUGIN CONFIG)
+
+IF(NOT SalomeHEXABLOCKPLUGIN_FIND_QUIETLY)
+  MESSAGE(STATUS "Found Salome HEXABLOCKPLUGIN: ${HEXABLOCKPLUGIN_ROOT_DIR}")
+ENDIF()

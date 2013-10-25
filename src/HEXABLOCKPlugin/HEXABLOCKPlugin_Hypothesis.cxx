@@ -63,6 +63,14 @@ void HEXABLOCKPlugin_Hypothesis::SetXmlFlow (cpchar xml)
 }
 
 //=======================================================================
+//function : GetXmlFlow
+//=======================================================================
+cpchar HEXABLOCKPlugin_Hypothesis::GetXmlFlow () const
+{
+   return (hyp_document == NULL) ? NULL : hyp_document->getXml();
+}
+
+//=======================================================================
 //function : SetDocument
 //=======================================================================
 void HEXABLOCKPlugin_Hypothesis::SetDocument (cpchar name)

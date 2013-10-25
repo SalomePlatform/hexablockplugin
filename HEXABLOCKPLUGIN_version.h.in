@@ -24,12 +24,22 @@
 #if !defined(__HEXABLOCKPLUGIN_VERSION_H__)
 #define __HEXABLOCKPLUGIN_VERSION_H__
 
-/*
-  HEXABLOCKPLUGIN_VERSION is (major << 16) + (minor << 8) + patch.
+/*!
+  Specify version of SALOME HEXABLOCKPLUGIN module, as follows
+
+  HEXABLOCKPLUGIN_VERSION_MAJOR       : (integer) number identifying major version
+  HEXABLOCKPLUGIN_VERSION_MINOR       : (integer) number identifying minor version
+  HEXABLOCKPLUGIN_VERSION_MAINTENANCE : (integer) number identifying maintenance version
+  HEXABLOCKPLUGIN_VERSION_STR         : (string)  complete version number "major.minor.maintenance"
+  HEXABLOCKPLUGIN_VERSION             : (hex)     complete version number (major << 16) + (minor << 8) + maintenance
+  HEXABLOCKPLUGIN_DEVELOPMENT         : (integer) indicates development version when set to 1
 */
 
-#define HEXABLOCKPLUGIN_VERSION_STR "@VERSION@"
-#define HEXABLOCKPLUGIN_VERSION     @XVERSION@
-#define HEXABLOCKPLUGIN_DEVELOPMENT @VERSION_DEV@
+#define HEXABLOCKPLUGIN_VERSION_MAJOR       @SALOMEHEXABLOCKPLUGIN_MAJOR_VERSION@
+#define HEXABLOCKPLUGIN_VERSION_MINOR       @SALOMEHEXABLOCKPLUGIN_MINOR_VERSION@
+#define HEXABLOCKPLUGIN_VERSION_MAINTENANCE @SALOMEHEXABLOCKPLUGIN_PATCH_VERSION@
+#define HEXABLOCKPLUGIN_VERSION_STR         "@SALOMEHEXABLOCKPLUGIN_VERSION@"
+#define HEXABLOCKPLUGIN_VERSION             @SALOMEHEXABLOCKPLUGIN_XVERSION@
+#define HEXABLOCKPLUGIN_DEVELOPMENT         @SALOMEHEXABLOCKPLUGIN_VERSION_DEV@
 
 #endif // __HEXABLOCKPLUGIN_VERSION_H__
