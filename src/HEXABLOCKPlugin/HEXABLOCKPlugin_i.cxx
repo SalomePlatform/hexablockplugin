@@ -54,7 +54,7 @@ template <class T> class HEXABLOCKPlugin_Creator_i:public HypothesisCreator_i<T>
 
 extern "C"
 {
-  HEXABLOCKPLUGIN_EXPORT
+  HEXABLOCKPLUGINENGINE_EXPORT
   GenericHypothesisCreator_i* GetHypothesisCreator (const char* aHypName)
   {
     if(MYDEBUG) MESSAGE("GetHypothesisCreator " << aHypName);

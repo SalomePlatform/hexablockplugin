@@ -24,16 +24,7 @@
 #define _SMESH_HexaBlocks_HeaderFile
 
 #include <SALOMEconfig.h>
-
-#ifdef WNT
-# if defined HEXABLOCKS_EXPORTS || defined HexaBlocks_EXPORTS
-#  define HEXABLOCKS_EXPORT __declspec( dllexport )
-# else
-#  define HEXABLOCKS_EXPORT __declspec( dllimport )
-# endif
-#else
-# define HEXABLOCKS_EXPORT
-#endif
+#include "HEXABLOCKPlugin_Defs.hxx"
 
 #include "SMESH_Mesh.hxx"
 #include "SMESH_Group.hxx"
@@ -53,7 +44,7 @@
 //=====================================================================
 // SMESH_HexaBlocks : class definition
 //=====================================================================
-class HEXABLOCKS_EXPORT SMESH_HexaBlocks
+class HEXABLOCKPLUGINENGINE_EXPORT SMESH_HexaBlocks
 {
 public:
 

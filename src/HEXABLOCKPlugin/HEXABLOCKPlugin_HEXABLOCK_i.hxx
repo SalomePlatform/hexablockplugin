@@ -29,13 +29,14 @@
 #include CORBA_SERVER_HEADER(HEXABLOCKPlugin_Algorithm)
 #include CORBA_SERVER_HEADER(SALOME_Exception)
 
+#include "HEXABLOCKPlugin_Defs.hxx"
 #include "SMESH_3D_Algo_i.hxx"
 #include "HEXABLOCKPlugin_HEXABLOCK.hxx"
 
 // ======================================================
 // HEXABLOCK 3d algorithm
 // ======================================================
-class HEXABLOCKPlugin_HEXABLOCK_i:
+class HEXABLOCKPLUGINENGINE_EXPORT HEXABLOCKPlugin_HEXABLOCK_i:
   public virtual POA_HEXABLOCKPlugin::HEXABLOCKPlugin_HEXABLOCK,
   public virtual SMESH_3D_Algo_i
 {

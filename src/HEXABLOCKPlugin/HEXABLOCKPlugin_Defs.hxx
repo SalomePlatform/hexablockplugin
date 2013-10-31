@@ -25,13 +25,13 @@
 #define _HEXABLOCKPlugin_DEFS_HXX_
 
 #ifdef WIN32
-  #if defined HEXABLOCKPLUGIN_EXPORTS || defined HEXABLOCKEngine_EXPORTS
-    #define HEXABLOCKPLUGIN_EXPORT __declspec( dllexport )
+  #if defined HEXABLOCKENGINE_EXPORTS || defined HexaBlockEngine_EXPORTS
+    #define HEXABLOCKPLUGINENGINE_EXPORT __declspec( dllexport )
   #else
-    #define HEXABLOCKPLUGIN_EXPORT __declspec( dllimport )
+    #define HEXABLOCKPLUGINENGINE_EXPORT __declspec( dllimport )
   #endif
 #else
-  #define HEXABLOCKPLUGIN_EXPORT
+  #define HEXABLOCKPLUGINENGINE_EXPORT
 #endif
 
 #endif

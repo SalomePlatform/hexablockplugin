@@ -26,7 +26,7 @@
 #define HEXABLOCKPLUGINGUI_HypothesisCreator_HeaderFile
 
 #ifdef WIN32
-  #if defined HEXABLOCKPluginGUI_EXPORTS
+  #if defined HEXABLOCKPLUGINGUI_EXPORTS || defined HEXABLOCKPluginGUI_EXPORTS
     #define HEXABLOCKPLUGINGUI_EXPORT __declspec( dllexport )
   #else
     #define HEXABLOCKPLUGINGUI_EXPORT __declspec( dllimport )

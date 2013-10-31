@@ -24,6 +24,7 @@
 #ifndef __SMESH_HexaFromSkin_3D_HXX__
 #define __SMESH_HexaFromSkin_3D_HXX__
 
+#include "HEXABLOCKPlugin_Defs.hxx"
 #include "SMESH_StdMeshers.hxx"
 #include "SMESH_Algo.hxx"
 
@@ -40,7 +41,7 @@
  * \brief Alorithm generating hexahedral mesh from 2D skin of block
  */
 
-class STDMESHERS_EXPORT SMESH_HexaFromSkin_3D : public SMESH_3D_Algo
+class HEXABLOCKPLUGINENGINE_EXPORT SMESH_HexaFromSkin_3D : public SMESH_3D_Algo
 {
 public:
 //   SMESH_HexaFromSkin_3D(int hypId, int studyId, SMESH_Gen* gen);

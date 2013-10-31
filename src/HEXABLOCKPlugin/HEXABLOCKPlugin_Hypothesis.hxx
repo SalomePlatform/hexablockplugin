@@ -36,7 +36,7 @@
 #include <stdexcept>
 #include <cstdio>
 
-class HEXABLOCKPLUGIN_EXPORT HEXABLOCKPlugin_Hypothesis: public SMESH_Hypothesis
+class HEXABLOCKPLUGINENGINE_EXPORT HEXABLOCKPlugin_Hypothesis: public SMESH_Hypothesis
 {
 public:
 
@@ -61,8 +61,8 @@ public:
   // Persistence
   virtual std::ostream & SaveTo(std::ostream & save);
   virtual std::istream & LoadFrom(std::istream & load);
-  friend HEXABLOCKPLUGIN_EXPORT std::ostream & operator <<(std::ostream & save, HEXABLOCKPlugin_Hypothesis & hyp);
-  friend HEXABLOCKPLUGIN_EXPORT std::istream & operator >>(std::istream & load, HEXABLOCKPlugin_Hypothesis & hyp);
+  friend HEXABLOCKPLUGINENGINE_EXPORT std::ostream & operator <<(std::ostream & save, HEXABLOCKPlugin_Hypothesis & hyp);
+  friend HEXABLOCKPLUGINENGINE_EXPORT std::istream & operator >>(std::istream & load, HEXABLOCKPlugin_Hypothesis & hyp);
 
   /*!
    * \brief Does nothing

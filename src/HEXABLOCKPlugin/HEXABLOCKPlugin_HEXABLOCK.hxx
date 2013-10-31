@@ -27,13 +27,14 @@
 #ifndef _HEXABLOCKPlugin_HEXABLOCK_HXX_
 #define _HEXABLOCKPlugin_HEXABLOCK_HXX_
 
+#include "HEXABLOCKPlugin_Defs.hxx"
 #include "SMESH_Algo.hxx"
 #include "SMESH_Mesh.hxx"
 
 class SMESH_Mesh;
 class HEXABLOCKPlugin_Hypothesis;
 
-class HEXABLOCKPlugin_HEXABLOCK: public SMESH_3D_Algo
+class HEXABLOCKPLUGINENGINE_EXPORT HEXABLOCKPlugin_HEXABLOCK: public SMESH_3D_Algo
 {
 public:
   HEXABLOCKPlugin_HEXABLOCK(int hypId, int studyId, SMESH_Gen* gen);

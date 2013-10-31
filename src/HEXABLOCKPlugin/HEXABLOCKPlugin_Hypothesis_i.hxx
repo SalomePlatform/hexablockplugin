@@ -38,7 +38,7 @@ class SMESH_Gen;
 
 // HEXABLOCKPlugin parameters hypothesis
 
-class HEXABLOCKPLUGIN_EXPORT HEXABLOCKPlugin_Hypothesis_i:
+class HEXABLOCKPLUGINENGINE_EXPORT HEXABLOCKPlugin_Hypothesis_i:
   public virtual POA_HEXABLOCKPlugin::HEXABLOCKPlugin_Hypothesis,
   public virtual SMESH_Hypothesis_i
 {

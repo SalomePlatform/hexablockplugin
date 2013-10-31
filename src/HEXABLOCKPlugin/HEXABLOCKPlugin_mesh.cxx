@@ -25,7 +25,6 @@
 #include <algorithm>
 
 // CasCade includes
-#include <AIS_Shape.hxx>
 
 #include <Precision.hxx>
 #include <BRep_Tool.hxx>
@@ -445,12 +444,12 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
     if(MYDEBUG) MESSAGE("SEARCHING INITIAL QUAD ..." );
     for ( std::list<HEXA_NS::Quad*>::iterator it = skinQuad.begin(); it != skinQuad.end(); it++ ){
         _searchInitialQuadWay( *it, e_0, e_1 );
-        if ( e_0 != NULL and e_1 != NULL ){
+        if ( e_0 != NULL && e_1 != NULL ){
           q = first_q = *it;
           break;
         }
     }
-    if ( e_0 == NULL and e_1 == NULL ) ASSERT(false);// should never happened,
+    if ( e_0 == NULL && e_1 == NULL ) ASSERT(false);// should never happened,
     if(MYDEBUG) MESSAGE("INITIAL QUAD FOUND!" );
     for ( int j=0 ; j < 4 ; ++j ){
       e = q->getEdge(j);
@@ -1352,7 +1351,7 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
     MESSAGE("looking for curve: curve_lenght = "<<myCurve_lengths[curve]);
     MESSAGE("looking for curve: curve.size _lenght= "<<myCurve_list.size());
   }
-  while ( not ( (myCurve_u >= curve_start) and  (myCurve_u <= curve_end) ) ) {
+  while ( !( (myCurve_u >= curve_start) &&  (myCurve_u <= curve_end) ) ) {
 
     ASSERT( myCurve_list.size() != 0 );
     myCurve_list.pop_front();
@@ -1533,21 +1532,21 @@ void SMESH_HexaBlocks::_searchInitialQuadWay( HEXA_NS::Quad* q, HEXA_NS::Vertex*
     HEXA_NS::Vertex* e0 = e->getVertex(0);
     HEXA_NS::Vertex* e1 = e->getVertex(1);
 
-    if ( e0 == qA and e1 != qB and e1 != qC and e1 != qD ){
+    if ( e0 == qA && e1 != qB && e1 != qC && e1 != qD ){
       qAA = e1;
-    } else if ( e1 == qA and e0 != qB and e0 != qC and e0 != qD ){
+    } else if ( e1 == qA && e0 != qB && e0 != qC && e0 != qD ){
       qAA = e0;
-    } else if ( e0 == qB and e1 != qA and e1 != qC and e1 != qD ){
+    } else if ( e0 == qB && e1 != qA && e1 != qC && e1 != qD ){
       qBB = e1;
-    } else if ( e1 == qB and e0 != qA and e0 != qC and e0 != qD ){
+    } else if ( e1 == qB && e0 != qA && e0 != qC && e0 != qD ){
       qBB = e0;
-    } else if ( e0 == qC and e1 != qA and e1 != qB and e1 != qD ){
+    } else if ( e0 == qC && e1 != qA && e1 != qB && e1 != qD ){
       qCC = e1;
-    } else if ( e1 == qC and e0 != qA and e0 != qB and e0 != qD ){
+    } else if ( e1 == qC && e0 != qA && e0 != qB && e0 != qD ){
       qCC = e0;
-    } else if ( e0 == qD and e1 != qA and e1 != qB and e1 != qC ){
+    } else if ( e0 == qD && e1 != qA && e1 != qB && e1 != qC ){
       qDD = e1;
-    } else if ( e1 == qD and e0 != qA and e0 != qB and e0 != qC ){
+    } else if ( e1 == qD && e0 != qA && e0 != qB && e0 != qC ){
       qDD = e0;
     }
   }
