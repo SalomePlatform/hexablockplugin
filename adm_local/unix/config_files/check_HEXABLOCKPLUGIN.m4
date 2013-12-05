@@ -47,7 +47,7 @@ if test "x$HEXABLOCKPLUGIN_DIR" = "x" ; then
   else
 
     # search Salome binaries in PATH variable
-    AC_PATH_PROG(TEMP, libHexaBlockEngine.so)
+    AC_PATH_PROG(TEMP, libHexaBlockPluginEngine.so)
     if test "x$TEMP" != "x" ; then
       HEXABLOCKPLUGIN_DIR=`dirname $TEMP`
     fi
@@ -56,7 +56,7 @@ if test "x$HEXABLOCKPLUGIN_DIR" = "x" ; then
 
 fi
 
-if test -f ${HEXABLOCKPLUGIN_DIR}/lib/salome/libHexaBlockEngine.so  ; then
+if test -f ${HEXABLOCKPLUGIN_DIR}/lib/salome/libHexaBlockPluginEngine.so  ; then
   HEXABLOCKPLUGIN_ok=yes
   AC_MSG_RESULT(Using HEXABLOCKPLUGIN module distribution in ${HEXABLOCKPLUGIN_DIR})
 
