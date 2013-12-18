@@ -20,10 +20,13 @@
 -->
 <document>
   <section name="resources">
-    <parameter name="HEXABLOCKPlugin" value="${HEXABLOCKPLUGIN_ROOT_DIR}/share/salome/resources/HEXABLOCKplugin"/>
+    <parameter name="HEXABLOCKPlugin" value="${HEXABLOCKPLUGIN_ROOT_DIR}/share/salome/resources/hexablockplugin"/>
   </section>
   <section name="SMESH">
     <!-- Default SMESH module plugins -->
     <parameter name="plugins" value="HEXABLOCKPlugin"/>
+  </section>
+  <section name="smesh_help">
+    <parameter name="Plug-ins/HEXABLOCK plugin User's Guide" value="${HEXABLOCKPLUGIN_ROOT_DIR}/share/doc/salome/gui/HEXABLOCKPLUGIN/index.html"/>
   </section>
 </document>

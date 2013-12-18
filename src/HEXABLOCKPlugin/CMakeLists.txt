@@ -60,7 +60,7 @@ SET(_link_LIBRARIES
 # --- headers ---
 
 # header files
-SET(HexaBlockEngine_HEADERS
+SET(HexaBlockPluginEngine_HEADERS
   HEXABLOCKPlugin_Defs.hxx
   HEXABLOCKPlugin_HEXABLOCK.hxx
   HEXABLOCKPlugin_HEXABLOCK_i.hxx
@@ -73,7 +73,7 @@ SET(HexaBlockEngine_HEADERS
 # --- sources ---
 
 # sources / static
-SET(HexaBlockEngine_SOURCES
+SET(HexaBlockPluginEngine_SOURCES
   HEXABLOCKPlugin_HEXABLOCK.cxx
   HEXABLOCKPlugin_HEXABLOCK_i.cxx
   HEXABLOCKPlugin_i.cxx
@@ -85,8 +85,8 @@ SET(HexaBlockEngine_SOURCES
 
 # --- rules ---
 
-ADD_LIBRARY(HexaBlockEngine ${HexaBlockEngine_SOURCES})
-TARGET_LINK_LIBRARIES(HexaBlockEngine ${_link_LIBRARIES} )
-INSTALL(TARGETS HexaBlockEngine EXPORT ${PROJECT_NAME}TargetGroup DESTINATION ${SALOME_INSTALL_LIBS})
+ADD_LIBRARY(HexaBlockPluginEngine ${HexaBlockPluginEngine_SOURCES})
+TARGET_LINK_LIBRARIES(HexaBlockPluginEngine ${_link_LIBRARIES} )
+INSTALL(TARGETS HexaBlockPluginEngine EXPORT ${PROJECT_NAME}TargetGroup DESTINATION ${SALOME_INSTALL_LIBS})
 
-INSTALL(FILES ${HexaBlockEngine_HEADERS} DESTINATION ${SALOME_INSTALL_HEADERS})
+INSTALL(FILES ${HexaBlockPluginEngine_HEADERS} DESTINATION ${SALOME_INSTALL_HEADERS})

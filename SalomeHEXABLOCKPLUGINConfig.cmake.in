@@ -34,7 +34,7 @@
 # Load the dependencies for the libraries of @PROJECT_NAME@ 
 # (contains definitions for IMPORTED targets). This is only 
 # imported if we are not built as a subproject (in this case targets are already there)
-IF(NOT TARGET HexaBlockEngine AND NOT @PROJECT_NAME@_BINARY_DIR)
+IF(NOT TARGET HexaBlockPluginEngine AND NOT @PROJECT_NAME@_BINARY_DIR)
   INCLUDE("@PACKAGE_SALOME_INSTALL_CMAKE_LOCAL@/@PROJECT_NAME@Targets.cmake")
 ENDIF() 
 
@@ -115,11 +115,11 @@ IF(NOT (TARGET SMESHEngine))
 ENDIF()
 
 # Include HEXABLOCK targets if they were not already loaded:
-IF(NOT (TARGET HEXABLOCKEngine))
+IF(NOT (TARGET HexaBlockPluginEngine))
   INCLUDE("${HEXABLOCK_ROOT_DIR_EXP}/${SALOME_INSTALL_CMAKE}/SalomeHEXABLOCKTargets.cmake")
 ENDIF()
 
 # Exposed HEXABLOCKPLUGIN targets:
-SET(HEXABLOCKPLUGIN_HexaBlockEngine HexaBlockEngine)
+SET(HEXABLOCKPLUGIN_HexaBlockPluginEngine HexaBlockPluginEngine)
 SET(HEXABLOCKPLUGIN_HEXABLOCKPluginGUI HEXABLOCKPluginGUI)
 SET(HEXABLOCKPLUGIN_SalomeIDLHEXABLOCKPLUGIN SalomeIDLHEXABLOCKPLUGIN)

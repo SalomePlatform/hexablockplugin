@@ -25,7 +25,7 @@
 #define _HEXABLOCKPlugin_DEFS_HXX_
 
 #ifdef WIN32
-  #if defined HEXABLOCKENGINE_EXPORTS || defined HexaBlockEngine_EXPORTS
+  #if defined HEXABLOCKENGINE_EXPORTS || defined HexaBlockPluginEngine_EXPORTS
     #define HEXABLOCKPLUGINENGINE_EXPORT __declspec( dllexport )
   #else
     #define HEXABLOCKPLUGINENGINE_EXPORT __declspec( dllimport )

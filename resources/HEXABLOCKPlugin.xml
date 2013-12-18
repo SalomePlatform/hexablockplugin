@@ -28,7 +28,7 @@
 <meshers-group name="HEXABLOCK"
                resources="HEXABLOCKPlugin"
                idl-module="HEXABLOCKPlugin"
-               server-lib="HEXABLOCKEngine"
+               server-lib="HexaBlockPluginEngine"
                gui-lib="HEXABLOCKPluginGUI">
 
   <hypotheses>
