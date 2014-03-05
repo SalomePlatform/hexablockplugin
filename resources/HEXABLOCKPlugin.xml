@@ -46,6 +46,7 @@
                hypos="HEXABLOCK_Parameters"
                output="HEXA"
                dim="3"
+               context="PRIVATE"
                support-submeshes="false"
                />
   </algorithms>
