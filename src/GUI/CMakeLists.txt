@@ -77,6 +77,7 @@ SET(_other_SOURCES
 SET(_ts_RESOURCES
   HEXABLOCKPlugin_images.ts
   HEXABLOCKPlugin_msg_en.ts
+  HEXABLOCKPlugin_msg_ja.ts
 ) 
 
 # sources / to compile
