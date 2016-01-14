@@ -124,7 +124,7 @@ std::istream & HEXABLOCKPlugin_Hypothesis::LoadFrom(std::istream & load)
 //     else
 //         load.clear(ios::badbit | load.rdstate());
     
-    isOK = (load >> i);
+    isOK = static_cast<bool>(load >> i);
     if (isOK)
         hyp_dimension = i;
     else
