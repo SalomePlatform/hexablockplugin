@@ -38,7 +38,6 @@
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <TopoDS_Face.hxx>
-#include "Handle_Geom_Curve.hxx"
 #include <BRepAdaptor_Curve.hxx>
 
 //=====================================================================
