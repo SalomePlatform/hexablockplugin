@@ -32,10 +32,11 @@
 
 #include <Basics_Utils.hxx>
 
+#include "SMESHDS_Mesh.hxx"
 #include "SMESH_Gen.hxx"
 #include "SMESH_Mesh.hxx"
-#include "SMESH_subMesh.hxx"
 #include "SMESH_MesherHelper.hxx"
+#include "SMESH_subMesh.hxx"
 
 #include "HEXABLOCKPlugin_mesh.hxx"
  

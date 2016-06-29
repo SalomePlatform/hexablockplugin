@@ -26,8 +26,9 @@
 #include <SALOMEconfig.h>
 #include "HEXABLOCKPlugin_Defs.hxx"
 
-#include "SMESH_Mesh.hxx"
+#include "SMESHDS_Mesh.hxx"
 #include "SMESH_Group.hxx"
+#include "SMESH_Mesh.hxx"
 #include "hexa_base.hxx" // from HexaBlocks
 #include "HexFaceShape.hxx" // from HexaBlocks
 
