@@ -47,8 +47,7 @@ using namespace std;
 //=============================================================================
 
 HEXABLOCKPlugin_HEXABLOCK_i::HEXABLOCKPlugin_HEXABLOCK_i (PortableServer::POA_ptr thePOA,
-                                          int                     theStudyId,
-                                          ::SMESH_Gen*            theGenImpl )
+                                                          ::SMESH_Gen*            theGenImpl )
      : SALOME::GenericObj_i( thePOA ), 
        SMESH_Hypothesis_i( thePOA ), 
        SMESH_Algo_i( thePOA ),
@@ -56,8 +55,7 @@ HEXABLOCKPlugin_HEXABLOCK_i::HEXABLOCKPlugin_HEXABLOCK_i (PortableServer::POA_pt
 {
   if(MYDEBUG) MESSAGE( "HEXABLOCKPlugin_HEXABLOCK_i::HEXABLOCKPlugin_HEXABLOCK_i" );
   myBaseImpl = new ::HEXABLOCKPlugin_HEXABLOCK (theGenImpl->GetANewId(),
-                                        theStudyId,
-                                        theGenImpl );
+                                                theGenImpl );
 }
 
 //=============================================================================

@@ -44,8 +44,8 @@
 class HEXABLOCKPLUGINENGINE_EXPORT SMESH_HexaFromSkin_3D : public SMESH_3D_Algo
 {
 public:
-//   SMESH_HexaFromSkin_3D(int hypId, int studyId, SMESH_Gen* gen);
-  SMESH_HexaFromSkin_3D(int hypId, int studyId, SMESH_Gen* gen, HEXA_NS::Document* doc);
+//   SMESH_HexaFromSkin_3D(int hypId, SMESH_Gen* gen);
+  SMESH_HexaFromSkin_3D(int hypId, SMESH_Gen* gen, HEXA_NS::Document* doc);
   virtual ~SMESH_HexaFromSkin_3D();
 
   virtual bool Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHelper);
