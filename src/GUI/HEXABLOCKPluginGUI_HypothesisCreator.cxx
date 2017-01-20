@@ -93,15 +93,15 @@ enum {
 
 namespace {
 
-#ifdef WIN32
+#if defined(WIN32)
 #include <windows.h>
-#else
+#elif !defined(__APPLE__)
 #include <sys/sysinfo.h>
 #endif
 
   int maxAvailableMemory()
   {
-#ifdef WIN32
+#if defined(WIN32)
     // See http://msdn.microsoft.com/en-us/library/aa366589.aspx
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof (statex);
@@ -113,7 +113,7 @@ namespace {
         statex.ullTotalVirtual / 1024 / 1024;
       return (int) ( 0.7 * totMB );
     }
-#else
+#elif !defined(__APPLE__)
     struct sysinfo si;
     int err = sysinfo( &si );
     if ( err == 0 ) {
