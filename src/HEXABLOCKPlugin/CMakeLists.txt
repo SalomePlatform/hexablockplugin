@@ -21,7 +21,7 @@
 # additional include directories
 INCLUDE_DIRECTORIES(
   ${KERNEL_INCLUDE_DIRS}
-  ${CAS_INCLUDE_DIRS}
+  ${OpenCASCADE_INCLUDE_DIR}
   ${VTK_INCLUDE_DIRS}
   ${GEOM_INCLUDE_DIRS}
   ${HEXABLOCK_INCLUDE_DIRS}
@@ -34,18 +34,18 @@ INCLUDE_DIRECTORIES(
 # additional preprocessor / compiler flags
 ADD_DEFINITIONS(  
   ${OMNIORB_DEFINITIONS}
-  ${CAS_DEFINITIONS}
+  ${OpenCASCADE_DEFINITIONS}
   ${BOOST_DEFINITIONS}
 )
 
 # libraries to link to
 SET(_link_LIBRARIES
-  ${CAS_TKBRep}
-  ${CAS_TKG2d}
-  ${CAS_TKG3d}
-  ${CAS_TKTopAlgo}
-  ${CAS_TKGeomBase}
-  ${CAS_TKGeomAlgo}
+  TKBRep
+  TKG2d
+  TKG3d
+  TKTopAlgo
+  TKGeomBase
+  TKGeomAlgo
   ${HEXABLOCK_HEXABLOCKEngine}
   ${SMESH_SMESHimpl}
   ${SMESH_SMESHEngine}
