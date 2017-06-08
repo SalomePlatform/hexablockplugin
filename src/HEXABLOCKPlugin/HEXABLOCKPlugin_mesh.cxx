@@ -1055,7 +1055,7 @@ bool SMESH_HexaBlocks::computeHexa( HEXA_NS::Document* doc )
   aHelper.SetElementsOnShape( true );
 
   SMESH_Gen* gen = _theMesh->GetGen();
-  SMESH_HexaFromSkin_3D algo( gen->GetANewId(), 0, gen, doc );
+  SMESH_HexaFromSkin_3D algo( 0, gen, doc );
   algo.InitComputeError();
   try {
       ok = algo.Compute( *_theMesh, &aHelper, _volumesOnHexa, _node );

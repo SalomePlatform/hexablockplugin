@@ -40,7 +40,7 @@ class HEXABLOCKPLUGINENGINE_EXPORT HEXABLOCKPlugin_Hypothesis: public SMESH_Hypo
 {
 public:
 
-  HEXABLOCKPlugin_Hypothesis(int hypId, int studyId, SMESH_Gen * gen);
+  HEXABLOCKPlugin_Hypothesis(int hypId, SMESH_Gen * gen);
 
   /*!
    * Define the document to be meshed, mandatory

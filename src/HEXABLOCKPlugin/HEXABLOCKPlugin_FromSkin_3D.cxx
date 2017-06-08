@@ -1080,15 +1080,15 @@ HEXA_NS::Hexa* _block2Hexa( const _Block& block,
 //purpose  : 
 //=======================================================================
 
-// SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D(int hypId, int studyId, SMESH_Gen* gen)
-//   :SMESH_3D_Algo(hypId, studyId, gen)
+// SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D(int hypId, SMESH_Gen* gen)
+//   :SMESH_3D_Algo(hypId, gen)
 // {
 //   MESSAGE("SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D");
 //   _name = "HexaFromSkin_3D";
 // }
 
-SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D(int hypId, int studyId, SMESH_Gen* gen, HEXA_NS::Document* doc)
-  :SMESH_3D_Algo(hypId, studyId, gen),
+SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D(int hypId, SMESH_Gen* gen, HEXA_NS::Document* doc)
+  :SMESH_3D_Algo(hypId, gen),
   _doc( doc )
 {
   if(MYDEBUG) MESSAGE("SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D");

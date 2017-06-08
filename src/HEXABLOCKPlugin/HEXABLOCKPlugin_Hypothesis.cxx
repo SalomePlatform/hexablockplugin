@@ -30,8 +30,8 @@
 //function : HEXABLOCKPlugin_Hypothesis
 //=======================================================================
 
-HEXABLOCKPlugin_Hypothesis::HEXABLOCKPlugin_Hypothesis(int hypId, int studyId, SMESH_Gen * gen)
-  : SMESH_Hypothesis(hypId, studyId, gen)
+HEXABLOCKPlugin_Hypothesis::HEXABLOCKPlugin_Hypothesis(int hypId, SMESH_Gen * gen)
+  : SMESH_Hypothesis(hypId, gen)
 {
    hexa_root     = HEXA_NS::Hex::getInstance ();
    hyp_document  = NULL;

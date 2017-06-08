@@ -37,7 +37,7 @@ class HEXABLOCKPlugin_Hypothesis;
 class HEXABLOCKPLUGINENGINE_EXPORT HEXABLOCKPlugin_HEXABLOCK: public SMESH_3D_Algo
 {
 public:
-  HEXABLOCKPlugin_HEXABLOCK(int hypId, int studyId, SMESH_Gen* gen);
+  HEXABLOCKPlugin_HEXABLOCK(int hypId, SMESH_Gen* gen);
   virtual ~HEXABLOCKPlugin_HEXABLOCK();
 
   virtual bool CheckHypothesis(SMESH_Mesh&         aMesh,

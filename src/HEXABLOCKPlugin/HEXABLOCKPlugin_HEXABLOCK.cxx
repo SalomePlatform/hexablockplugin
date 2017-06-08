@@ -61,8 +61,8 @@ static int MYDEBUG = 0;
  */
 //=============================================================================
 
-HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK(int hypId, int studyId, SMESH_Gen* gen)
-  : SMESH_3D_Algo(hypId, studyId, gen)
+HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK(int hypId, SMESH_Gen* gen)
+  : SMESH_3D_Algo(hypId, gen)
 {
   if(MYDEBUG) MESSAGE("HEXABLOCKPlugin_HEXABLOCK::HEXABLOCKPlugin_HEXABLOCK");
   _name = "HEXABLOCK_3D";
