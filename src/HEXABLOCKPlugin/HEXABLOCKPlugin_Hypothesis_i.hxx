@@ -49,26 +49,32 @@ class HEXABLOCKPLUGINENGINE_EXPORT HEXABLOCKPlugin_Hypothesis_i:
   // Destructor
   virtual ~HEXABLOCKPlugin_Hypothesis_i();
 
-    /*!
-     * Define the document to be meshed, mandatory
-     */
-    char* GetDocument ();
-    void  SetDocument (const char* doc);
+  /*!
+   * Define the document to be meshed, mandatory
+   */
+  char* GetDocument ();
+  void  SetDocument (const char* doc);
 
-    /*!
-     * To define the hight dimension to generated: 3 = hexas, 2 = quads, 1 = segments, 0 = nodes
-     */
-    CORBA::Long GetDimension();
-    void SetDimension(CORBA::Long dim);
+  /*!
+   * To define the hight dimension to generated: 3 = hexas, 2 = quads, 1 = segments, 0 = nodes
+   */
+  CORBA::Long GetDimension();
+  void SetDimension(CORBA::Long dim);
 
-    // Get implementation
-    ::HEXABLOCKPlugin_Hypothesis* GetImpl();
-  
-    // Verify whether hypothesis supports given entity type 
-    CORBA::Boolean IsDimSupported( SMESH::Dimension type );
+  // Get implementation
+  ::HEXABLOCKPlugin_Hypothesis* GetImpl();
+
+  // Verify whether hypothesis supports given entity type
+  CORBA::Boolean IsDimSupported( SMESH::Dimension type );
+
+  // Methods for copying mesh definition to other geometry
+  virtual bool getObjectsDependOn( std::vector< std::string > & entryArray,
+                                   std::vector< int >         & subIDArray ) const { return false; }
+  virtual bool setObjectsDependOn( std::vector< std::string > & entryArray,
+                                   std::vector< int >         & subIDArray ) { return true; }
 
  private:
-    PortableServer::POA_var _poa;// POA reference
+  PortableServer::POA_var _poa;// POA reference
 
 };
 
