@@ -1625,8 +1625,7 @@ SMESH_Group* SMESH_HexaBlocks::_createGroup(HEXA_NS::Group& grHex)
     default : ASSERT(false);
   }
 
-  int aId;
-  SMESH_Group* aGr = _theMesh->AddGroup(aGrType, aGrName.c_str(), aId);
+  SMESH_Group* aGr = _theMesh->AddGroup(aGrType, aGrName.c_str());
 
   if(MYDEBUG) MESSAGE("_createGroup() : end  >>>>>>>>");
   return aGr;
