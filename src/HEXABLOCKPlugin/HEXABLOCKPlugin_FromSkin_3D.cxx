@@ -114,7 +114,7 @@ namespace
     if ( nbF % 2 )
       return true;
 
-    set<const SMDS_MeshNode*> nodesInInverseFaces;
+    std::set<const SMDS_MeshNode*> nodesInInverseFaces;
     SMDS_ElemIteratorPtr fIt = n->GetInverseElementIterator(SMDSAbs_Face );
     while ( fIt->more() )
     {
@@ -214,7 +214,7 @@ namespace
    */
   struct _BlockSide
   {
-    vector<const SMDS_MeshNode*> _grid;
+    std::vector<const SMDS_MeshNode*> _grid;
     _Indexer                     _index;
     int                          _nbBlocksExpected;
     int                          _nbBlocksFound;
@@ -307,7 +307,7 @@ namespace
   struct _Block
   {
     _OrientedBlockSide        _side[6]; // 6 sides of a sub-block
-    set<const SMDS_MeshNode*> _corners;
+    std::set<const SMDS_MeshNode*> _corners;
 
     const _OrientedBlockSide& getSide(int i) const { return _side[i]; }
     bool setSide( int i, const _OrientedBlockSide& s)
@@ -351,14 +351,14 @@ namespace
     bool fillRowsUntilCorner(const SMDS_MeshElement* quad,
                              const SMDS_MeshNode*    n1,
                              const SMDS_MeshNode*    n2,
-                             vector<const SMDS_MeshNode*>& verRow1,
-                             vector<const SMDS_MeshNode*>& verRow2,
+                             std::vector<const SMDS_MeshNode*>& verRow1,
+                             std::vector<const SMDS_MeshNode*>& verRow2,
                              bool alongN1N2 );
     _OrientedBlockSide findBlockSide( EBoxSides           startBlockSide,
                                       EQuadEdge           sharedSideEdge1,
                                       EQuadEdge           sharedSideEdge2,
                                       bool                withGeometricAnalysis,
-                                      set< _BlockSide* >& sidesAround);
+                                      std::set< _BlockSide* >& sidesAround);
     //!< update own data and data of the side bound to block
     void setSideBoundToBlock( _BlockSide& side )
     {
@@ -371,11 +371,11 @@ namespace
 
     SMESH_Comment      _error;
 
-    list< _BlockSide > _allSides;
-    vector< _Block >   _blocks;
+    std::list< _BlockSide > _allSides;
+    std::vector< _Block >   _blocks;
 
     //map< const SMDS_MeshNode*, set< _BlockSide* > > _corner2sides;
-    map< SMESH_OrientedLink, set< _BlockSide* > > _edge2sides;
+    std::map< SMESH_OrientedLink, std::set< _BlockSide* > > _edge2sides;
   };
 
   //================================================================================
@@ -411,8 +411,8 @@ namespace
 
     int nbFacesOnSides = 0;
     TIDSortedElemSet cornerFaces; // corner faces of found _BlockSide's
-    list< const SMDS_MeshNode* > corners( 1, nCorner );
-    list< const SMDS_MeshNode* >::iterator corner = corners.begin();
+    std::list< const SMDS_MeshNode* > corners( 1, nCorner );
+    std::list< const SMDS_MeshNode* >::iterator corner = corners.begin();
     while ( corner != corners.end() )
     {
       SMDS_ElemIteratorPtr faceIt = (*corner)->GetInverseElementIterator( SMDSAbs_Face );
@@ -476,9 +476,9 @@ namespace
 
     // analyse sharing of sides by blocks and sort sides by nb of adjacent sides
     int nbBlockSides = 0; // total nb of block sides taking into account their sharing
-    multimap<int, _BlockSide* > sortedSides;
+    std::multimap<int, _BlockSide* > sortedSides;
     {
-      list < _BlockSide >::iterator sideIt = _allSides.begin();
+      std::list < _BlockSide >::iterator sideIt = _allSides.begin();
       for ( ; sideIt != _allSides.end(); ++sideIt )
       {
         _BlockSide& side = *sideIt;
@@ -493,7 +493,7 @@ namespace
         side._nbBlocksFound = 0;
         side._nbBlocksExpected = isSharedSide ? 2 : 1;
         nbBlockSides += side._nbBlocksExpected;
-        sortedSides.insert( make_pair( nbAdjacent, & side ));
+        sortedSides.insert( std::make_pair( nbAdjacent, & side ));
       }
     }
 
@@ -502,7 +502,7 @@ namespace
     while ( nbBlockSides >= 6 )
     {
       // get any side not bound to all blocks it belongs to
-      multimap<int, _BlockSide*>::iterator i_side = sortedSides.begin();
+      std::multimap<int, _BlockSide*>::iterator i_side = sortedSides.begin();
       while ( i_side != sortedSides.end() && i_side->second->isBound())
         ++i_side;
 
@@ -521,7 +521,7 @@ namespace
       EQuadEdge edgeOfAdj  [4] = { Q_BOTTOM, Q_LEFT, Q_BOTTOM, Q_LEFT };
       // first find all sides detectable w/o advanced analysis,
       // then repeat the search, which then may pass without advanced analysis
-      set< _BlockSide* > sidesAround;
+      std::set< _BlockSide* > sidesAround;
       for ( int advAnalys = 0; advAnalys < 2; ++advAnalys )
       {
         // try to find 4 sides adjacent to a FRONT side
@@ -603,7 +603,7 @@ namespace
       const SMDS_MeshNode* nOnEdge = firstQuad->GetNode( (iCorner+1) % 4);
 
       // find out size of block side
-      vector<const SMDS_MeshNode*> horRow1, horRow2, verRow1, verRow2;
+      std::vector<const SMDS_MeshNode*> horRow1, horRow2, verRow1, verRow2;
       if ( !fillRowsUntilCorner( firstQuad, nCorner, nOnEdge, horRow1, horRow2, true ) ||
            !fillRowsUntilCorner( firstQuad, nCorner, nOnEdge, verRow1, verRow2, false ))
         return false;
@@ -687,7 +687,7 @@ namespace
   //================================================================================
 
   bool isClosedChainOfSides( _BlockSide*                                        startSide,
-                             map< const SMDS_MeshNode*, list< _BlockSide* > > & corner2Sides )
+                             std::map< const SMDS_MeshNode*, std::list< _BlockSide* > > & corner2Sides )
   {
     // get start and end nodes
     const SMDS_MeshNode *n1 = 0, *n2 = 0, *n;
@@ -703,7 +703,7 @@ namespace
       }
     if ( !n2 ) return false;
 
-    map< const SMDS_MeshNode*, list< _BlockSide* > >::iterator
+    std::map< const SMDS_MeshNode*, std::list< _BlockSide* > >::iterator
       c2sides = corner2Sides.find( n1 );
     if ( c2sides == corner2Sides.end() ) return false;
 
@@ -713,7 +713,7 @@ namespace
     while ( n != n2 )
     {
       // get the next side sharing n
-      list< _BlockSide* > & sides = c2sides->second;
+      std::list< _BlockSide* > & sides = c2sides->second;
       _BlockSide* nextSide = ( sides.back() == prevSide ? sides.front() : sides.back() );
       if ( nextSide == prevSide ) return false;
 
@@ -749,7 +749,7 @@ namespace
                                            EQuadEdge           sharedSideEdge1,
                                            EQuadEdge           sharedSideEdge2,
                                            bool                withGeometricAnalysis,
-                                           set< _BlockSide* >& sidesAround)
+                                           std::set< _BlockSide* >& sidesAround)
   {
     _Block& block = _blocks.back();
     _OrientedBlockSide& side1 = block._side[ startBlockSide ];
@@ -758,10 +758,10 @@ namespace
     SMESH_OrientedLink edge = side1.edge( sharedSideEdge1 );
     const SMDS_MeshNode* n1 = edge.node1();
     const SMDS_MeshNode* n2 = edge.node2();
-    if ( edge._reversed ) swap( n1, n2 );
+    if ( edge._reversed ) std::swap( n1, n2 );
 
     // find all sides sharing both nodes n1 and n2
-    set< _BlockSide* > sidesOnEdge = _edge2sides[ edge ]; // copy a set
+    std::set< _BlockSide* > sidesOnEdge = _edge2sides[ edge ]; // copy a set
 
     // exclude loaded sides of block from sidesOnEdge
     for (int i = 0; i < NB_BLOCK_SIDES; ++i )
@@ -780,7 +780,7 @@ namespace
     }
     else
     {
-      set< _BlockSide* >::iterator sideIt = sidesOnEdge.begin();
+      std::set< _BlockSide* >::iterator sideIt = sidesOnEdge.begin();
       int nbLoadedSides = block.nbSides();
       if ( nbLoadedSides > 1 )
       {
@@ -812,7 +812,7 @@ namespace
           // Find a side starting from which we can walk around the startBlockSide
 
           // fill in corner2Sides
-          map< const SMDS_MeshNode*, list< _BlockSide* > > corner2Sides;
+          std::map< const SMDS_MeshNode*, std::list< _BlockSide* > > corner2Sides;
           for ( sideIt = sidesAround.begin(); sideIt != sidesAround.end(); ++sideIt )
           {
             _BlockSide* sideI = *sideIt;
@@ -822,7 +822,7 @@ namespace
             corner2Sides[ sideI->getCornerNode(1,1) ].push_back( sideI );
           }
           // remove corners of startBlockSide from corner2Sides
-          set<const SMDS_MeshNode*>::iterator nIt = block._corners.begin();
+	  std::set<const SMDS_MeshNode*>::iterator nIt = block._corners.begin();
           for ( ; nIt != block._corners.end(); ++nIt )
             corner2Sides.erase( *nIt );
 
@@ -852,7 +852,7 @@ namespace
           _DUMP_("  Select adjacent for "<< side1._side << " - side dir ("
                  << side1Dir.X() << ", " << side1Dir.Y() << ", " << side1Dir.Z() << ")" );
 
-          map < double , _BlockSide* > angleOfSide;
+          std::map < double , _BlockSide* > angleOfSide;
           for (sideIt = sidesOnEdge.begin(); sideIt != sidesOnEdge.end(); ++sideIt )
           {
             _BlockSide* sideI = *sideIt;
@@ -863,7 +863,7 @@ namespace
             gp_Vec2d sideIDirProj( sideIDir * pln.XDirection(), sideIDir * pln.YDirection());
             double angle = sideIDirProj.Angle( gp::DX2d() );
             if ( angle < 0 ) angle += 2. * M_PI; // angle [0-2*PI]
-            angleOfSide.insert( make_pair( angle, sideI ));
+            angleOfSide.insert( std::make_pair( angle, sideI ));
             _DUMP_("  "<< sideI << " - side dir ("
                    << sideIDir.X() << ", " << sideIDir.Y() << ", " << sideIDir.Z() << ")"
                    << " angle " << angle);
@@ -917,8 +917,8 @@ namespace
   bool _Skin::fillRowsUntilCorner(const SMDS_MeshElement*       quad,
                                   const SMDS_MeshNode*          n1,
                                   const SMDS_MeshNode*          n2,
-                                  vector<const SMDS_MeshNode*>& row1,
-                                  vector<const SMDS_MeshNode*>& row2,
+                                  std::vector<const SMDS_MeshNode*>& row1,
+                                  std::vector<const SMDS_MeshNode*>& row2,
                                   const bool                    alongN1N2 )
   {
     const SMDS_MeshNode* corner1 = n1;
@@ -1033,7 +1033,7 @@ HEXA_NS::Hexa* _block2Hexa( const _Block& block,
     const SMDS_MeshNode* n011 = block.getSide(B_TOP).cornerNode( 0, 1 );
     const SMDS_MeshNode* n111 = block.getSide(B_TOP).cornerNode( 1, 1 );
 
-    list<const SMDS_MeshNode* > nodeFromBlock;
+    std::list<const SMDS_MeshNode* > nodeFromBlock;
     nodeFromBlock.push_back(n000);
     nodeFromBlock.push_back(n100);
     nodeFromBlock.push_back(n010);
@@ -1049,7 +1049,7 @@ HEXA_NS::Hexa* _block2Hexa( const _Block& block,
     int nHexa = doc->countUsedHexa();
     for (int j=0; j <nHexa; ++j ){
       hexa = doc->getUsedHexa(j);
-      list<const SMDS_MeshNode* > nodeFromHexa;
+      std::list<const SMDS_MeshNode* > nodeFromHexa;
       int nVx = hexa->countVertex();
       for ( int i=0; i <nVx; ++i ){
         HEXA_NS::Vertex* v = hexa->getVertex(i);
@@ -1114,7 +1114,7 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
   if ( nbBlocks == 0 )
     return error( skin.error());
 
-  vector< vector< const SMDS_MeshNode* > > columns;
+  std::vector< std::vector< const SMDS_MeshNode* > > columns;
   int x, xSize, y, ySize, z, zSize;
   _Indexer colIndex;
 
@@ -1135,8 +1135,8 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
 
     // fill node columns by front and back box sides
     for ( x = 0; x < xSize; ++x ) {
-      vector< const SMDS_MeshNode* >& column0 = columns[ colIndex( x, 0 )];
-      vector< const SMDS_MeshNode* >& column1 = columns[ colIndex( x, Y )];
+      std::vector< const SMDS_MeshNode* >& column0 = columns[ colIndex( x, 0 )];
+      std::vector< const SMDS_MeshNode* >& column1 = columns[ colIndex( x, Y )];
       column0.resize( zSize );
       column1.resize( zSize );
       for ( z = 0; z < zSize; ++z ) {
@@ -1146,8 +1146,8 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
     }
     // fill node columns by left and right box sides
     for ( y = 1; y < ySize-1; ++y ) {
-      vector< const SMDS_MeshNode* >& column0 = columns[ colIndex( 0, y )];
-      vector< const SMDS_MeshNode* >& column1 = columns[ colIndex( X, y )];
+      std::vector< const SMDS_MeshNode* >& column0 = columns[ colIndex( 0, y )];
+      std::vector< const SMDS_MeshNode* >& column1 = columns[ colIndex( X, y )];
       column0.resize( zSize );
       column1.resize( zSize );
       for ( z = 0; z < zSize; ++z ) {
@@ -1158,7 +1158,7 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
     // get nodes from top and bottom box sides
     for ( x = 1; x < xSize-1; ++x ) {
       for ( y = 1; y < ySize-1; ++y ) {
-        vector< const SMDS_MeshNode* >& column = columns[ colIndex( x, y )];
+        std::vector< const SMDS_MeshNode* >& column = columns[ colIndex( x, y )];
         column.resize( zSize );
         column.front() = block.getSide(B_BOTTOM).node( x, y );
         column.back()  = block.getSide(B_TOP)   .node( x, y );
@@ -1170,7 +1170,7 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
     // ----------------------------
     // projection points of internal nodes on box sub-shapes by which
     // coordinates of internal nodes are computed
-    vector<gp_XYZ> pointOnShape( SMESH_Block::ID_Shell );
+    std::vector<gp_XYZ> pointOnShape( SMESH_Block::ID_Shell );
 
     // projections on vertices are constant
     pointOnShape[ SMESH_Block::ID_V000 ] = block.getSide(B_BOTTOM).xyz( 0, 0 );
@@ -1190,7 +1190,7 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
       {
         params.SetCoord( 2, y / double(Y) );
         // column to fill during z loop
-        vector< const SMDS_MeshNode* >& column = columns[ colIndex( x, y )];
+        std::vector< const SMDS_MeshNode* >& column = columns[ colIndex( x, y )];
         // projections on horizontal edges
         pointOnShape[ SMESH_Block::ID_Ex00 ] = block.getSide(B_BOTTOM).xyz( x, 0 );
         pointOnShape[ SMESH_Block::ID_Ex10 ] = block.getSide(B_BOTTOM).xyz( x, Y );
@@ -1242,7 +1242,7 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
 
     // find out orientation by a least distorted hexahedron (issue 0020855);
     // the last is defined by evaluating sum of face normals of 8 corner hexahedrons
-    double badness = numeric_limits<double>::max();
+    double badness = std::numeric_limits<double>::max();
     bool isForw = true;
     for ( int xMax = 0; xMax < 2; ++xMax )
       for ( int yMax = 0; yMax < 2; ++yMax )
@@ -1251,10 +1251,10 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
           x = xMax ? xSize-1 : 1;
           y = yMax ? ySize-1 : 1;
           z = zMax ? zSize-1 : 1;
-          vector< const SMDS_MeshNode* >& col00 = columns[ colIndex( x-1, y-1 )];
-          vector< const SMDS_MeshNode* >& col10 = columns[ colIndex( x  , y-1 )];
-          vector< const SMDS_MeshNode* >& col01 = columns[ colIndex( x-1, y   )];
-          vector< const SMDS_MeshNode* >& col11 = columns[ colIndex( x  , y )];
+          std::vector< const SMDS_MeshNode* >& col00 = columns[ colIndex( x-1, y-1 )];
+          std::vector< const SMDS_MeshNode* >& col10 = columns[ colIndex( x  , y-1 )];
+          std::vector< const SMDS_MeshNode* >& col01 = columns[ colIndex( x-1, y   )];
+          std::vector< const SMDS_MeshNode* >& col11 = columns[ colIndex( x  , y )];
           
           const SMDS_MeshNode* n000 = col00[z-1];
           const SMDS_MeshNode* n100 = col10[z-1];
@@ -1287,10 +1287,10 @@ bool SMESH_HexaFromSkin_3D::Compute(SMESH_Mesh & aMesh, SMESH_MesherHelper* aHel
     // add elements
     for ( x = 0; x < xSize-1; ++x ) {
       for ( y = 0; y < ySize-1; ++y ) {
-        vector< const SMDS_MeshNode* >& col00 = columns[ colIndex( x, y )];
-        vector< const SMDS_MeshNode* >& col10 = columns[ colIndex( x+1, y )];
-        vector< const SMDS_MeshNode* >& col01 = columns[ colIndex( x, y+1 )];
-        vector< const SMDS_MeshNode* >& col11 = columns[ colIndex( x+1, y+1 )];
+        std::vector< const SMDS_MeshNode* >& col00 = columns[ colIndex( x, y )];
+        std::vector< const SMDS_MeshNode* >& col10 = columns[ colIndex( x+1, y )];
+        std::vector< const SMDS_MeshNode* >& col01 = columns[ colIndex( x, y+1 )];
+        std::vector< const SMDS_MeshNode* >& col11 = columns[ colIndex( x+1, y+1 )];
         // bottom face normal of a hexa mush point outside the volume
         if ( isForw )
           for ( z = 0; z < zSize-1; ++z )
@@ -1323,7 +1323,7 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
   if ( nbBlocks == 0 )
     return error( skin.error());
 
-  vector< vector< const SMDS_MeshNode* > > columns;
+  std::vector< std::vector< const SMDS_MeshNode* > > columns;
   int x, xSize, y, ySize, z, zSize;
   _Indexer colIndex;
 
@@ -1344,8 +1344,8 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
 
     // fill node columns by front and back box sides
     for ( x = 0; x < xSize; ++x ) {
-      vector< const SMDS_MeshNode* >& column0 = columns[ colIndex( x, 0 )];
-      vector< const SMDS_MeshNode* >& column1 = columns[ colIndex( x, Y )];
+      std::vector< const SMDS_MeshNode* >& column0 = columns[ colIndex( x, 0 )];
+      std::vector< const SMDS_MeshNode* >& column1 = columns[ colIndex( x, Y )];
       column0.resize( zSize );
       column1.resize( zSize );
       for ( z = 0; z < zSize; ++z ) {
@@ -1355,8 +1355,8 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
     }
     // fill node columns by left and right box sides
     for ( y = 1; y < ySize-1; ++y ) {
-      vector< const SMDS_MeshNode* >& column0 = columns[ colIndex( 0, y )];
-      vector< const SMDS_MeshNode* >& column1 = columns[ colIndex( X, y )];
+      std::vector< const SMDS_MeshNode* >& column0 = columns[ colIndex( 0, y )];
+      std::vector< const SMDS_MeshNode* >& column1 = columns[ colIndex( X, y )];
       column0.resize( zSize );
       column1.resize( zSize );
       for ( z = 0; z < zSize; ++z ) {
@@ -1367,7 +1367,7 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
     // get nodes from top and bottom box sides
     for ( x = 1; x < xSize-1; ++x ) {
       for ( y = 1; y < ySize-1; ++y ) {
-        vector< const SMDS_MeshNode* >& column = columns[ colIndex( x, y )];
+        std::vector< const SMDS_MeshNode* >& column = columns[ colIndex( x, y )];
         column.resize( zSize );
         column.front() = block.getSide(B_BOTTOM).node( x, y );
         column.back()  = block.getSide(B_TOP)   .node( x, y );
@@ -1379,7 +1379,7 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
     // ----------------------------
     // projection points of internal nodes on box subshapes by which
     // coordinates of internal nodes are computed
-    vector<gp_XYZ> pointOnShape( SMESH_Block::ID_Shell );
+    std::vector<gp_XYZ> pointOnShape( SMESH_Block::ID_Shell );
 
     // projections on vertices are constant
     pointOnShape[ SMESH_Block::ID_V000 ] = block.getSide(B_BOTTOM).xyz( 0, 0 );
@@ -1399,7 +1399,7 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
       {
         params.SetCoord( 2, y / double(Y) );
         // column to fill during z loop
-        vector< const SMDS_MeshNode* >& column = columns[ colIndex( x, y )];
+        std::vector< const SMDS_MeshNode* >& column = columns[ colIndex( x, y )];
         // projections on horizontal edges
         pointOnShape[ SMESH_Block::ID_Ex00 ] = block.getSide(B_BOTTOM).xyz( x, 0 );
         pointOnShape[ SMESH_Block::ID_Ex10 ] = block.getSide(B_BOTTOM).xyz( x, Y );
@@ -1467,10 +1467,10 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
 
     for ( x = 0; x < xSize-1; ++x ) {
       for ( y = 0; y < ySize-1; ++y ) {
-        vector< const SMDS_MeshNode* >& col00 = columns[ colIndex( x, y )];
-        vector< const SMDS_MeshNode* >& col10 = columns[ colIndex( x+1, y )];
-        vector< const SMDS_MeshNode* >& col01 = columns[ colIndex( x, y+1 )];
-        vector< const SMDS_MeshNode* >& col11 = columns[ colIndex( x+1, y+1 )];
+        std::vector< const SMDS_MeshNode* >& col00 = columns[ colIndex( x, y )];
+        std::vector< const SMDS_MeshNode* >& col10 = columns[ colIndex( x+1, y )];
+        std::vector< const SMDS_MeshNode* >& col01 = columns[ colIndex( x, y+1 )];
+        std::vector< const SMDS_MeshNode* >& col11 = columns[ colIndex( x+1, y+1 )];
         // bottom face normal of a hexa mush point outside the volume
         if ( isForw )
           for ( z = 0; z < zSize-1; ++z ){
@@ -1526,7 +1526,7 @@ bool SMESH_HexaFromSkin_3D::Evaluate(SMESH_Mesh &         aMesh,
   bool secondOrder = aMesh.NbFaces( ORDER_QUADRATIC );
 
   int entity = secondOrder ? SMDSEntity_Quad_Hexa : SMDSEntity_Hexa;
-  vector<int>& nbByType = aResMap[ aMesh.GetSubMesh( aShape )];
+  std::vector<int>& nbByType = aResMap[ aMesh.GetSubMesh( aShape )];
   if ( entity >= nbByType.size() )
     nbByType.resize( SMDSEntity_Last, 0 );
 

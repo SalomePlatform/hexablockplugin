@@ -122,13 +122,13 @@ std::istream & HEXABLOCKPlugin_Hypothesis::LoadFrom(std::istream & load)
 //     if (isOK)
 //         hyp_document = xml_2_doc(str);
 //     else
-//         load.clear(ios::badbit | load.rdstate());
+//         load.clear(std::ios::badbit | load.rdstate());
     
     isOK = static_cast<bool>(load >> i);
     if (isOK)
         hyp_dimension = i;
     else
-        load.clear(ios::badbit | load.rdstate());
+        load.clear(std::ios::badbit | load.rdstate());
     
   return load;
 }
