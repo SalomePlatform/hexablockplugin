@@ -309,11 +309,8 @@ QFrame* HEXABLOCKPluginGUI_HypothesisCreator::buildFrame()
   mySmpModel->setHorizontalHeaderLabels(enforcedHeaders);
   myEnforcedTableView->setAlternatingRowColors(true);
   myEnforcedTableView->verticalHeader()->hide();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  myEnforcedTableView->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
   myEnforcedTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
+
   QLabel* myXCoordLabel = new QLabel( tr( "HEXABLOCK_ENF_VER_X_LABEL" ), myEnfGroup );
   anSmpLayout->addWidget(myXCoordLabel, ENF_VER_X_COORD, 1, 1, 1);
   myXCoord = new QLineEdit(myEnfGroup);
