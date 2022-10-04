@@ -10,7 +10,7 @@ module.
 
 For more information please visit the SALOME platform web site:
 
-  <http://www.salome-platform.org/>
+  <https://www.salome-platform.org/>
 
 =======
 License
@@ -18,10 +18,6 @@ License
 
 SALOME platform is distributed under the GNU Lesser General Public License.
 See COPYING file for more details.
-
-Also, additional information can be found at SALOME platform web site:
-
-  <http://www.salome-platform.org/downloads/license/>
 
 ============
 Installation
@@ -39,11 +35,7 @@ site:
 
 * Check Release Notes and Software Requirements of the latest SALOME release at
 
-  <http://www.salome-platform.org/downloads/current-version/>
-
-* Pre-requisites page at SALOME web site:
-
-  <http://www.salome-platform.org/downloads/license/>
+  <https://www.salome-platform.org/?page_id=15/>
 
 Note: SALOME HexaBlock plug-in needs SALOME KERNEL, SALOME GUI, SALOME Geometry, 
 SALOME Mesh and SALOME HexaBlock as pre-requisites.
