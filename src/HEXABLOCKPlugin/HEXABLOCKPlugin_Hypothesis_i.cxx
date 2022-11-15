@@ -33,12 +33,6 @@
 #include <Utils_CorbaException.hxx>
 #include <utilities.h>
 
-#ifdef _DEBUG_
-static int MYDEBUG = HEXA_NS::on_debug ();
-#else
-static int MYDEBUG = 0;
-#endif
-
 //=======================================================================
 //function : HEXABLOCKPlugin_Hypothesis_i
 //=======================================================================
@@ -48,7 +42,7 @@ HEXABLOCKPlugin_Hypothesis_i::HEXABLOCKPlugin_Hypothesis_i (PortableServer::POA_
   : SALOME::GenericObj_i( thePOA ), 
     SMESH_Hypothesis_i( thePOA )
 {
-  if(MYDEBUG) MESSAGE( "HEXABLOCKPlugin_Hypothesis_i::HEXABLOCKPlugin_Hypothesis_i" );
+  MESSAGE( "HEXABLOCKPlugin_Hypothesis_i::HEXABLOCKPlugin_Hypothesis_i" );
   myBaseImpl = new ::HEXABLOCKPlugin_Hypothesis (theGenImpl->GetANewId(),
                                                  theGenImpl);
   _poa = PortableServer::POA::_duplicate(thePOA);
@@ -60,7 +54,7 @@ HEXABLOCKPlugin_Hypothesis_i::HEXABLOCKPlugin_Hypothesis_i (PortableServer::POA_
 
 HEXABLOCKPlugin_Hypothesis_i::~HEXABLOCKPlugin_Hypothesis_i()
 {
-  if(MYDEBUG) MESSAGE( "HEXABLOCKPlugin_Hypothesis_i::~HEXABLOCKPlugin_Hypothesis_i" );
+  MESSAGE( "HEXABLOCKPlugin_Hypothesis_i::~HEXABLOCKPlugin_Hypothesis_i" );
 }
 
 //=============================================================================

@@ -30,12 +30,6 @@
 #include "utilities.h"
 #include "hexa_base.hxx"
 
-#ifdef _DEBUG_
-static int MYDEBUG = HEXA_NS::on_debug ();
-#else
-static int MYDEBUG = 0;
-#endif
-
 using namespace std;
 
 //=============================================================================
@@ -53,7 +47,7 @@ HEXABLOCKPlugin_HEXABLOCK_i::HEXABLOCKPlugin_HEXABLOCK_i (PortableServer::POA_pt
        SMESH_Algo_i( thePOA ),
        SMESH_3D_Algo_i( thePOA )
 {
-  if(MYDEBUG) MESSAGE( "HEXABLOCKPlugin_HEXABLOCK_i::HEXABLOCKPlugin_HEXABLOCK_i" );
+  MESSAGE( "HEXABLOCKPlugin_HEXABLOCK_i::HEXABLOCKPlugin_HEXABLOCK_i" );
   myBaseImpl = new ::HEXABLOCKPlugin_HEXABLOCK (theGenImpl->GetANewId(),
                                                 theGenImpl );
 }
@@ -68,7 +62,7 @@ HEXABLOCKPlugin_HEXABLOCK_i::HEXABLOCKPlugin_HEXABLOCK_i (PortableServer::POA_pt
 
 HEXABLOCKPlugin_HEXABLOCK_i::~HEXABLOCKPlugin_HEXABLOCK_i()
 {
-  if(MYDEBUG) MESSAGE( "HEXABLOCKPlugin_HEXABLOCK_i::~HEXABLOCKPlugin_HEXABLOCK_i" );
+  MESSAGE( "HEXABLOCKPlugin_HEXABLOCK_i::~HEXABLOCKPlugin_HEXABLOCK_i" );
 }
 
 //=============================================================================
@@ -81,7 +75,7 @@ HEXABLOCKPlugin_HEXABLOCK_i::~HEXABLOCKPlugin_HEXABLOCK_i()
 
 ::HEXABLOCKPlugin_HEXABLOCK* HEXABLOCKPlugin_HEXABLOCK_i::GetImpl()
 {
-  if(MYDEBUG) MESSAGE( "HEXABLOCKPlugin_HEXABLOCK_i::GetImpl" );
+  MESSAGE( "HEXABLOCKPlugin_HEXABLOCK_i::GetImpl" );
   return ( ::HEXABLOCKPlugin_HEXABLOCK* )myBaseImpl;
 }
 

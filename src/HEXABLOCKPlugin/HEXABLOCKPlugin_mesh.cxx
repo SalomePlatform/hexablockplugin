@@ -88,12 +88,6 @@
 }
 #endif
 
-#ifdef _DEBUG_
-static int  MYDEBUG = HEXA_NS::on_debug ();
-#else
-static int  MYDEBUG = 0;
-#endif
-
 
 static double HEXA_EPS      = 1.0e-3; //1E-3;
 static double HEXA_QUAD_WAY = M_PI/4.; //3.*PI/8.;
@@ -223,7 +217,7 @@ bool SMESH_HexaBlocks::computeEdge(HEXA_NS::Edge& edge, HEXA_NS::Law& law)
 
 bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& law )
 {
-  if(MYDEBUG) MESSAGE("computeEdgeByAssoc(edgeID = "<<edge.getId()<<"): begin   <<<<<<");
+  MESSAGE("computeEdgeByAssoc(edgeID = "<<edge.getId()<<"): begin   <<<<<<");
   ASSERT( _computeVertexOK );
   bool ok = true;
 
@@ -291,15 +285,15 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
      PutData (edge.getName());
      nbNodes = 0;
      }
-  if (MYDEBUG) MESSAGE("nbNodes -> "<<nbNodes);
+  MESSAGE("nbNodes -> "<<nbNodes);
   for (int i = 0; i < nbNodes; ++i){
       u = _Xx(i, law, nbNodes); //u between [0,1]
       myCurve_u = u*myCurve_tot_len;
-      if (MYDEBUG) {
-        MESSAGE("u -> "<<u);
-        MESSAGE("myCurve_u  -> "<<myCurve_u);
-        MESSAGE("myCurve_tot_len -> "<<myCurve_tot_len);
-      }
+
+      MESSAGE("u -> "<<u);
+      MESSAGE("myCurve_u  -> "<<myCurve_u);
+      MESSAGE("myCurve_tot_len -> "<<myCurve_tot_len);
+
       ptOnMyCurve = _getPtOnMyCurve( myCurve_u,
                                      myCurve_ways,
                                      myCurve_lengths,
@@ -323,7 +317,7 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
   _edgesOnEdge[&edge] = edgesOnEdge;
 
 
-  if(MYDEBUG) MESSAGE("computeEdgeByAssoc() : end  >>>>>>>>");
+  MESSAGE("computeEdgeByAssoc() : end  >>>>>>>>");
   return ok;
 }
 
@@ -332,26 +326,26 @@ bool SMESH_HexaBlocks::computeEdgeByAssoc( HEXA_NS::Edge& edge, HEXA_NS::Law& la
 
 bool SMESH_HexaBlocks::computeEdgeByShortestWire( HEXA_NS::Edge& edge, HEXA_NS::Law& law)
 {
-  if(MYDEBUG) MESSAGE("computeEdgeByShortestWire() not implemented");
+  MESSAGE("computeEdgeByShortestWire() not implemented");
   return false;
 }
 
 bool SMESH_HexaBlocks::computeEdgeByPlanWire( HEXA_NS::Edge& edge, HEXA_NS::Law& law)
 {
-  if(MYDEBUG) MESSAGE("computeEdgeByPlanWire() not implemented");
+  MESSAGE("computeEdgeByPlanWire() not implemented");
   return false;
 }
 
 bool SMESH_HexaBlocks::computeEdgeByIsoWire( HEXA_NS::Edge& edge, HEXA_NS::Law& law)
 {
-  if(MYDEBUG) MESSAGE("computeEdgeByIsoWire() not implemented");
+  MESSAGE("computeEdgeByIsoWire() not implemented");
   return false;
 }
 
 
 bool SMESH_HexaBlocks::computeEdgeBySegment(HEXA_NS::Edge& edge, HEXA_NS::Law& law)
 {
-  if(MYDEBUG) MESSAGE("computeEdgeBySegment() : : begin   <<<<<<");
+  MESSAGE("computeEdgeBySegment() : : begin   <<<<<<");
   ASSERT( _computeVertexOK );
   bool ok = true;
 
@@ -387,7 +381,7 @@ bool SMESH_HexaBlocks::computeEdgeBySegment(HEXA_NS::Edge& edge, HEXA_NS::Law& l
 
   //law of discretization
   int nbNodes = law.getNodes();
-  if (MYDEBUG) MESSAGE("nbNodes -> "<<nbNodes);
+  MESSAGE("nbNodes -> "<<nbNodes);
   for (int i = 0; i < nbNodes; ++i){
     u = _Xx(i, law, nbNodes);
     newNodeX = FIRST_NODE->X() + u * ( LAST_NODE->X() - FIRST_NODE->X() );
@@ -399,7 +393,7 @@ bool SMESH_HexaBlocks::computeEdgeBySegment(HEXA_NS::Edge& edge, HEXA_NS::Law& l
     nodesOnEdge.push_back(node_b);
     if  (_nodeXx.count(node_b) >= 1 ) ASSERT(false);
     _nodeXx[ node_b ] = u;
-    if(MYDEBUG) MESSAGE("_nodeXx <-"<<u);
+    MESSAGE("_nodeXx <-"<<u);
     node_a = node_b;
   }
   newEdge = _theMeshDS->AddEdge(node_a, LAST_NODE);
@@ -409,7 +403,7 @@ bool SMESH_HexaBlocks::computeEdgeBySegment(HEXA_NS::Edge& edge, HEXA_NS::Law& l
   _nodesOnEdge[&edge] = nodesOnEdge;
   _edgesOnEdge[&edge] = edgesOnEdge;
 
-  if(MYDEBUG) MESSAGE("computeEdgeBySegment() : end  >>>>>>>>");
+  MESSAGE("computeEdgeBySegment() : end  >>>>>>>>");
   return ok;
 }
 
@@ -441,7 +435,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
 
   // SECOND STEP: setting edges ways
   while ( skinQuad.size()>0 ){
-    if(MYDEBUG) MESSAGE("SEARCHING INITIAL QUAD ..." );
+    MESSAGE("SEARCHING INITIAL QUAD ..." );
     for ( std::list<HEXA_NS::Quad*>::iterator it = skinQuad.begin(); it != skinQuad.end(); it++ ){
         _searchInitialQuadWay( *it, e_0, e_1 );
         if ( e_0 != NULL && e_1 != NULL ){
@@ -450,7 +444,7 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
         }
     }
     if ( e_0 == NULL && e_1 == NULL ) ASSERT(false);// should never happened,
-    if(MYDEBUG) MESSAGE("INITIAL QUAD FOUND!" );
+    MESSAGE("INITIAL QUAD FOUND!" );
     for ( int j=0 ; j < 4 ; ++j ){
       e = q->getEdge(j);
       if  (    ((e_0 == e->getVertex(0)) && (e_1 == e->getVertex(1)))
@@ -458,13 +452,13 @@ std::map<HEXA_NS::Quad*, bool>  SMESH_HexaBlocks::computeQuadWays( HEXA_NS::Docu
         break;
       }
     }
-    if(MYDEBUG) MESSAGE("INITIAL EDGE WAY FOUND!" );
+    MESSAGE("INITIAL EDGE WAY FOUND!" );
 
     edgeWays[e] = std::make_pair( e_0, e_1 );
     workingQuad.push_back(q);
 
     while ( workingQuad.size() > 0 ){
-        if(MYDEBUG) MESSAGE("COMPUTE QUAD WAY ... ID ="<< q->getId());
+        MESSAGE("COMPUTE QUAD WAY ... ID ="<< q->getId());
         HEXA_NS::Vertex *lastVertex=NULL, *firstVertex = NULL;
         int i = 0;
         std::map<HEXA_NS::Edge*, std::pair<HEXA_NS::Vertex*, HEXA_NS::Vertex*> > localEdgeWays;
@@ -703,10 +697,10 @@ bool SMESH_HexaBlocks::computeQuadByAssoc( HEXA_NS::Quad& quad, bool way  )
 {
 //   int id = quad.getId();
 //   if ( id != 11 )  return false; //7
-  if (MYDEBUG){
-    MESSAGE("computeQuadByLinearApproximation() : : begin   <<<<<<");
-    MESSAGE("quadID = "<<quad.getId());
-  }
+
+  MESSAGE("computeQuadByLinearApproximation() : : begin   <<<<<<");
+  MESSAGE("quadID = "<<quad.getId());
+
   ASSERT( _computeEdgeOK );
   bool ok = true;
 
@@ -726,10 +720,10 @@ bool SMESH_HexaBlocks::computeQuadByAssoc( HEXA_NS::Quad& quad, bool way  )
 
   int nbass  = quad.countAssociation ();
   if (nbass==0)
-     {
-     if(MYDEBUG) MESSAGE("computeQuadByAssoc() : end  >>>>>>>>");
+  {
+     MESSAGE("computeQuadByAssoc() : end  >>>>>>>>");
      return false;
-     }
+  }
 
   TopoDS_Shape shapeOrCompound = getFaceShapes ( quad );
 
@@ -785,26 +779,22 @@ bool SMESH_HexaBlocks::computeQuadByAssoc( HEXA_NS::Quad& quad, bool way  )
               nodesOnQuad[i][j] = n4;
               interpolatedPoints[ n4 ] = newPt;
 
-              if (MYDEBUG) {
-                  MESSAGE("u parameter is "<<u);
-                  MESSAGE("v parameter is "<<v);
-                  MESSAGE("point interpolated ("<<newPt.X()<<","<<newPt.Y()<<","<<newPt.Z()<<" )");
-                  MESSAGE("point on shape     ("<<newNodeX<<","<<newNodeY<<","<<newNodeZ<<" )");
-              }
+              MESSAGE("u parameter is "<<u);
+              MESSAGE("v parameter is "<<v);
+              MESSAGE("point interpolated ("<<newPt.X()<<","<<newPt.Y()<<","<<newPt.Z()<<" )");
+              MESSAGE("point on shape     ("<<newNodeX<<","<<newNodeY<<","<<newNodeZ<<" )");
         }
 
-        if (MYDEBUG){
-          MESSAGE("n1 (" << n1->X() << "," << n1->Y() << "," << n1->Z() << ")");
-          MESSAGE("n2 (" << n2->X() << "," << n2->Y() << "," << n2->Z() << ")");
-          MESSAGE("n4 (" << n4->X() << "," << n4->Y() << "," << n4->Z() << ")");
-          MESSAGE("n3 (" << n3->X() << "," << n3->Y() << "," << n3->Z() << ")");
-        }
+        MESSAGE("n1 (" << n1->X() << "," << n1->Y() << "," << n1->Z() << ")");
+        MESSAGE("n2 (" << n2->X() << "," << n2->Y() << "," << n2->Z() << ")");
+        MESSAGE("n4 (" << n4->X() << "," << n4->Y() << "," << n4->Z() << ")");
+        MESSAGE("n3 (" << n3->X() << "," << n3->Y() << "," << n3->Z() << ")");
 
         if ( way == true ){
-            if (MYDEBUG) MESSAGE("AddFace( n1, n2, n3, n4 )");
+            MESSAGE("AddFace( n1, n2, n3, n4 )");
             newFace = _theMeshDS->AddFace( n1, n2, n3, n4 );
         } else {
-            if (MYDEBUG) MESSAGE("AddFace( n4, n3, n2, n1 )");
+            MESSAGE("AddFace( n4, n3, n2, n1 )");
             newFace = _theMeshDS->AddFace( n4, n3, n2, n1 );
         }
         facesOnQuad.push_back(newFace);
@@ -813,14 +803,14 @@ bool SMESH_HexaBlocks::computeQuadByAssoc( HEXA_NS::Quad& quad, bool way  )
   _quadNodes[ &quad ] = nodesOnQuad;
   _facesOnQuad[&quad] = facesOnQuad;
 
-  if(MYDEBUG) MESSAGE("computeQuadByLinearApproximation() : end  >>>>>>>>");
+  MESSAGE("computeQuadByLinearApproximation() : end  >>>>>>>>");
   return ok;
 }
 
 
 bool SMESH_HexaBlocks::computeQuadByFindingGeom( HEXA_NS::Quad& quad, bool way )
 {
-  if(MYDEBUG) MESSAGE("computeQuadByFindingGeom() not implemented");
+  MESSAGE("computeQuadByFindingGeom() not implemented");
   return false;
 }
 
@@ -829,7 +819,7 @@ bool SMESH_HexaBlocks::_computeQuadInit(
   ArrayOfSMESHNodes& nodesOnQuad,
   std::vector<double>& xx, std::vector<double>& yy)
 {
-  if(MYDEBUG) MESSAGE("_computeQuadInit() : begin ---------------");
+  MESSAGE("_computeQuadInit() : begin ---------------");
   bool ok = true;
 
   SMDS_MeshNode *S1, *S2, *S4, *S3;
@@ -925,7 +915,7 @@ bool SMESH_HexaBlocks::_computeQuadInit(
     }
   }
   if ( S1 != nodesOnQuad[0][0] ){
-    if(MYDEBUG) MESSAGE("ZZZZZZZZZZZZZZZZ quadID = "<<quad.getId());
+    MESSAGE("ZZZZZZZZZZZZZZZZ quadID = "<<quad.getId());
   }
 //   ASSERT( S1 == nodesOnQuad[0][0] );
 
@@ -934,7 +924,7 @@ bool SMESH_HexaBlocks::_computeQuadInit(
   for (j = 0, _j = gNodes.size()-1; j < gNodes.size(); ++j, --_j){
     nodesOnQuad[0][j] = gNodes[*g_j];
     if ( S1 != nodesOnQuad[0][0] ){
-      if(MYDEBUG) MESSAGE("XXXXXXXXXXXXXXXX quadID = "<<quad.getId());
+      MESSAGE("XXXXXXXXXXXXXXXX quadID = "<<quad.getId());
     }
 //     ASSERT( S1 == nodesOnQuad[0][0] );
     nodesOnQuad[bNodes.size()-1][j] = dNodes[*d_j];
@@ -965,10 +955,10 @@ bool SMESH_HexaBlocks::computeQuadByLinearApproximation( HEXA_NS::Quad& quad, bo
 {
 //   int id = quad.getId();
 //   if ( quad.getId() != 66 )  return false; //7, 41
-  if (MYDEBUG){
-    MESSAGE("computeQuadByLinearApproximation() : : begin   <<<<<<");
-    MESSAGE("quadID = "<<quad.getId());
-  }
+
+  MESSAGE("computeQuadByLinearApproximation() : : begin   <<<<<<");
+  MESSAGE("quadID = "<<quad.getId());
+
   ASSERT( _computeEdgeOK );
   bool ok = true;
 
@@ -1016,18 +1006,16 @@ bool SMESH_HexaBlocks::computeQuadByLinearApproximation( HEXA_NS::Quad& quad, bo
             nodesOnQuad[i][j] = n4;
         }
 
-        if (MYDEBUG){
-          MESSAGE("n1 (" << n1->X() << "," << n1->Y() << "," << n1->Z() << ")");
-          MESSAGE("n2 (" << n2->X() << "," << n2->Y() << "," << n2->Z() << ")");
-          MESSAGE("n4 (" << n4->X() << "," << n4->Y() << "," << n4->Z() << ")");
-          MESSAGE("n3 (" << n3->X() << "," << n3->Y() << "," << n3->Z() << ")");
-        }
+        MESSAGE("n1 (" << n1->X() << "," << n1->Y() << "," << n1->Z() << ")");
+        MESSAGE("n2 (" << n2->X() << "," << n2->Y() << "," << n2->Z() << ")");
+        MESSAGE("n4 (" << n4->X() << "," << n4->Y() << "," << n4->Z() << ")");
+        MESSAGE("n3 (" << n3->X() << "," << n3->Y() << "," << n3->Z() << ")");
 
         if ( way == true ){
-            if (MYDEBUG) MESSAGE("AddFace( n1, n2, n3, n4 )");
+            MESSAGE("AddFace( n1, n2, n3, n4 )");
             newFace = _theMeshDS->AddFace( n1, n2, n3, n4 );
         } else {
-            if (MYDEBUG) MESSAGE("AddFace( n4, n3, n2, n1 )");
+            MESSAGE("AddFace( n4, n3, n2, n1 )");
             newFace = _theMeshDS->AddFace( n4, n3, n2, n1 );
         }
         facesOnQuad.push_back(newFace);
@@ -1036,7 +1024,7 @@ bool SMESH_HexaBlocks::computeQuadByLinearApproximation( HEXA_NS::Quad& quad, bo
   _quadNodes[ &quad ] = nodesOnQuad;
   _facesOnQuad[&quad] = facesOnQuad;
 
-  if(MYDEBUG) MESSAGE("computeQuadByLinearApproximation() : end  >>>>>>>>");
+  MESSAGE("computeQuadByLinearApproximation() : end  >>>>>>>>");
   return ok;
 }
 
@@ -1046,7 +1034,7 @@ bool SMESH_HexaBlocks::computeQuadByLinearApproximation( HEXA_NS::Quad& quad, bo
 // --------------------------------------------------------------
 bool SMESH_HexaBlocks::computeHexa( HEXA_NS::Document* doc )
 {
-  if(MYDEBUG) MESSAGE("computeHexa() : : begin   <<<<<<");
+  MESSAGE("computeHexa() : : begin   <<<<<<");
   bool ok=false;
 
   SMESH_MesherHelper aHelper(*_theMesh);
@@ -1060,12 +1048,12 @@ bool SMESH_HexaBlocks::computeHexa( HEXA_NS::Document* doc )
   try {
       ok = algo.Compute( *_theMesh, &aHelper, _volumesOnHexa, _node );
   } catch(...) {
-    if(MYDEBUG) MESSAGE("SMESH_HexaFromSkin_3D error!!! ");
+    MESSAGE("SMESH_HexaFromSkin_3D error!!! ");
   }
-  if (MYDEBUG){
-    MESSAGE("SMESH_HexaFromSkin_3D.comment = "<<algo.GetComputeError()->myComment);
-    MESSAGE("computeHexa() : end  >>>>>>>>");
-  }
+
+  MESSAGE("SMESH_HexaFromSkin_3D.comment = "<<algo.GetComputeError()->myComment);
+  MESSAGE("computeHexa() : end  >>>>>>>>");
+
   return ok;
 }
 
@@ -1076,7 +1064,7 @@ bool SMESH_HexaBlocks::computeHexa( HEXA_NS::Document* doc )
 // --------------------------------------------------------------
 bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
 {
-  if(MYDEBUG) MESSAGE("computeDoc() : : begin   <<<<<<");
+  MESSAGE("computeDoc() : : begin   <<<<<<");
   bool ok = true;
 
   // A) Vertex computation
@@ -1121,14 +1109,14 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
     if ( quadWays.count(q) > 0 )
       ok = computeQuad( *q, quadWays[q] );
     else
-      if(MYDEBUG) MESSAGE("NO QUAD WAY ID = "<<id);
+      MESSAGE("NO QUAD WAY ID = "<<id);
 
   }
 
   // D) Hexa computation: Calling HexaFromSkin algo
   ok = computeHexa(doc);
 
-  if(MYDEBUG) MESSAGE("computeDoc() : end  >>>>>>>>");
+  MESSAGE("computeDoc() : end  >>>>>>>>");
   doc->lockDump ();
   return ok;
 }
@@ -1136,19 +1124,18 @@ bool SMESH_HexaBlocks::computeDoc(  HEXA_NS::Document* doc )
 
 void SMESH_HexaBlocks::buildGroups(HEXA_NS::Document* doc)
 {
-  if (MYDEBUG){
-    MESSAGE("_addGroups() : : begin   <<<<<<");
-    MESSAGE("_addGroups() : : nb. hexas= " << doc->countUsedHexa());
-    MESSAGE("_addGroups() : : nb. quads= " << doc->countUsedQuad());
-    MESSAGE("_addGroups() : : nb. edges= " << doc->countUsedEdge());
-    MESSAGE("_addGroups() : : nb. nodes= " << doc->countUsedVertex());
-  }
+  MESSAGE("_addGroups() : : begin   <<<<<<");
+  MESSAGE("_addGroups() : : nb. hexas= " << doc->countUsedHexa());
+  MESSAGE("_addGroups() : : nb. quads= " << doc->countUsedQuad());
+  MESSAGE("_addGroups() : : nb. edges= " << doc->countUsedEdge());
+  MESSAGE("_addGroups() : : nb. nodes= " << doc->countUsedVertex());
+
   // Looping on each groups of the document
   for ( int i=0; i < doc->countGroup(); i++ ){
       _fillGroup( doc->getGroup(i) );
   };
 
-  if(MYDEBUG) MESSAGE("_addGroups() : end  >>>>>>>>");
+  MESSAGE("_addGroups() : end  >>>>>>>>");
 }
 
 // --------------------------------------------------------------
@@ -1164,7 +1151,7 @@ double SMESH_HexaBlocks::_Xx( double i, HEXA_NS::Law law, double nbNodes) //, do
   switch (k){
     case HEXA_NS::Uniform:
         result = (i+1)/(nbNodes+1);
-        if(MYDEBUG) MESSAGE( "_Xx():" << " Uniform u("<<i<< ")"<< " = " << result);
+        MESSAGE( "_Xx():" << " Uniform u("<<i<< ")"<< " = " << result);
         break;
     case HEXA_NS::Arithmetic:
         u0 = 1./(nbNodes + 1.) - (coeff*nbNodes)/2.;
@@ -1175,7 +1162,7 @@ double SMESH_HexaBlocks::_Xx( double i, HEXA_NS::Law law, double nbNodes) //, do
         } else {
           result = (i + 1.)*u0 + coeff*i*(i+1.)/2.;
         };
-        if(MYDEBUG) MESSAGE( "_Xx():" << " Arithmetic u("<<i<< ")"<< " = " << result);
+        MESSAGE( "_Xx():" << " Arithmetic u("<<i<< ")"<< " = " << result);
         break;
     case HEXA_NS::Geometric:
         u0 = (1.-coeff)/(1.-pow(coeff, nbNodes + 1) )  ;
@@ -1186,7 +1173,7 @@ double SMESH_HexaBlocks::_Xx( double i, HEXA_NS::Law law, double nbNodes) //, do
         } else {
           result = u0 * (1.- pow(coeff, i + 1) )/(1.-coeff) ;
         };
-        if(MYDEBUG) MESSAGE( "_Xx():" << " Geometric u("<<i<< ")"<< " = " << result);
+        MESSAGE( "_Xx():" << " Geometric u("<<i<< ")"<< " = " << result);
         break;
   }
   return result;
@@ -1196,7 +1183,7 @@ double SMESH_HexaBlocks::_Xx( double i, HEXA_NS::Law law, double nbNodes) //, do
 // ============================================================= _edgeLength
 double SMESH_HexaBlocks::_edgeLength(const TopoDS_Edge & E)
 {
-  if(MYDEBUG) MESSAGE("_edgeLength() : : begin   <<<<<<");
+  MESSAGE("_edgeLength() : : begin   <<<<<<");
   double UMin = 0, UMax = 0;
   if (BRep_Tool::Degenerated(E))
     return 0;
@@ -1204,7 +1191,7 @@ double SMESH_HexaBlocks::_edgeLength(const TopoDS_Edge & E)
   Handle(Geom_Curve) C = BRep_Tool::Curve(E, L, UMin, UMax);
   GeomAdaptor_Curve AdaptCurve(C);
   double length = GCPnts_AbscissaPoint::Length(AdaptCurve, UMin, UMax);
-  if(MYDEBUG) MESSAGE("_edgeLength() : end  >>>>>>>>");
+  MESSAGE("_edgeLength() : end  >>>>>>>>");
   return length;
 }
 //--+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
@@ -1220,7 +1207,7 @@ void SMESH_HexaBlocks::_buildMyCurve(
     std::map< BRepAdaptor_Curve*, double>&      myCurve_starts,   //INOUT
     HEXA_NS::Edge& 	                        edge) // For error diagnostic
 {
-    if(MYDEBUG) MESSAGE("_buildMyCurve() : : begin   <<<<<<");
+    MESSAGE("_buildMyCurve() : : begin   <<<<<<");
     bool current_way  = true;
     myCurve_tot_len    = 0.;
     BRepAdaptor_Curve* thePreviousCurve = NULL;
@@ -1264,7 +1251,6 @@ void SMESH_HexaBlocks::_buildMyCurve(
                   }
                else
                   {
-                 if (MYDEBUG)
                      MESSAGE("SOMETHING WRONG on edge association... Bad script?");
                  edge.dumpAsso();
                  throw (SALOME_Exception (LOCALIZED("Edge association : check association parameters ( first, last ) between HEXA model and CAO")));
@@ -1287,7 +1273,6 @@ void SMESH_HexaBlocks::_buildMyCurve(
                   }
                else
                   {
-                  if (MYDEBUG)
                      MESSAGE("SOMETHING WRONG on edge association... bad script?");
 //                     ASSERT(false);
                   edge.dumpAsso();
@@ -1314,10 +1299,8 @@ void SMESH_HexaBlocks::_buildMyCurve(
         myCurve_list = tmp;
     }
 
-    if (MYDEBUG) {
-      MESSAGE("current_way  was :" << current_way);
-      MESSAGE("_buildMyCurve() : end  >>>>>>>>");
-    }
+    MESSAGE("current_way  was :" << current_way);
+    MESSAGE("_buildMyCurve() : end  >>>>>>>>");
 }
 
 
@@ -1333,7 +1316,7 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
 //     std::map< BRepAdaptor_Curve*, double>&  myCurve_firsts,
 //     std::map< BRepAdaptor_Curve*, double>&  myCurve_lasts,
 {
-  if(MYDEBUG) MESSAGE("_getPtOnMyCurve() : : begin   <<<<<<");
+  MESSAGE("_getPtOnMyCurve() : : begin   <<<<<<");
   gp_Pnt ptOnMyCurve;
 
   // looking for curve which contains parameter myCurve_u
@@ -1343,14 +1326,13 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
   double            curve_u;
   GCPnts_AbscissaPoint discret;
 
-  if (MYDEBUG){
-    MESSAGE("looking for curve               = "<<(long) curve);
-    MESSAGE("looking for curve: curve_u      = "<<myCurve_u);
-    MESSAGE("looking for curve: curve_start  = "<<curve_start);
-    MESSAGE("looking for curve: curve_end    = "<<curve_end);
-    MESSAGE("looking for curve: curve_lenght = "<<myCurve_lengths[curve]);
-    MESSAGE("looking for curve: curve.size _lenght= "<<myCurve_list.size());
-  }
+  MESSAGE("looking for curve               = "<<(long) curve);
+  MESSAGE("looking for curve: curve_u      = "<<myCurve_u);
+  MESSAGE("looking for curve: curve_start  = "<<curve_start);
+  MESSAGE("looking for curve: curve_end    = "<<curve_end);
+  MESSAGE("looking for curve: curve_lenght = "<<myCurve_lengths[curve]);
+  MESSAGE("looking for curve: curve.size _lenght= "<<myCurve_list.size());
+
   while ( !( (myCurve_u >= curve_start) &&  (myCurve_u <= curve_end) ) ) {
 
     ASSERT( myCurve_list.size() != 0 );
@@ -1358,12 +1340,11 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
     curve       = myCurve_list.front();
     curve_start = curve_end;
     curve_end   = curve_start + myCurve_lengths[curve];
-    if (MYDEBUG){
-      MESSAGE("go next curve: curve_lenght = "<<myCurve_lengths[curve]);
-      MESSAGE("go next curve: curve_start  = "<<curve_start);
-      MESSAGE("go next curve: curve_end    = "<<curve_end);
-      MESSAGE("go next curve: myCurve_u    = "<<myCurve_u);
-    }
+
+    MESSAGE("go next curve: curve_lenght = "<<myCurve_lengths[curve]);
+    MESSAGE("go next curve: curve_start  = "<<curve_start);
+    MESSAGE("go next curve: curve_end    = "<<curve_end);
+    MESSAGE("go next curve: myCurve_u    = "<<myCurve_u);
   }
   myCurve_start = curve_start;
 
@@ -1378,12 +1359,11 @@ gp_Pnt SMESH_HexaBlocks::_getPtOnMyCurve(
   curve_u = discret.Parameter();
   ptOnMyCurve = curve->Value( curve_u );
 
-  if (MYDEBUG){
-    MESSAGE("curve found!");
-    MESSAGE("curve_u = "<< curve_u);
-    MESSAGE("curve way = "<< myCurve_ways[curve]);
-    MESSAGE("_getPtOnMyCurve() : end  >>>>>>>>");
-  }
+  MESSAGE("curve found!");
+  MESSAGE("curve_u = "<< curve_u);
+  MESSAGE("curve way = "<< myCurve_ways[curve]);
+  MESSAGE("_getPtOnMyCurve() : end  >>>>>>>>");
+
   return ptOnMyCurve;
 }
 
@@ -1395,29 +1375,25 @@ void SMESH_HexaBlocks::_nodeInterpolationUV(double u, double v,
     SMDS_MeshNode* S1, SMDS_MeshNode* S2, SMDS_MeshNode* S3, SMDS_MeshNode* S4,
     double& xOut, double& yOut, double& zOut )
 {
-  if (MYDEBUG){
-    MESSAGE("_nodeInterpolationUV() IN:");
-    MESSAGE("u ( "<< u <<" )");
-    MESSAGE("v ( "<< v <<" )");
+  MESSAGE("_nodeInterpolationUV() IN:");
+  MESSAGE("u ( "<< u <<" )");
+  MESSAGE("v ( "<< v <<" )");
 
-    MESSAGE("S1 (" << S1->X() << "," << S1->Y() << "," << S1->Z() << ")");
-    MESSAGE("S2 (" << S2->X() << "," << S2->Y() << "," << S2->Z() << ")");
-    MESSAGE("S4 (" << S4->X() << "," << S4->Y() << "," << S4->Z() << ")");
-    MESSAGE("S3 (" << S3->X() << "," << S3->Y() << "," << S3->Z() << ")");
+  MESSAGE("S1 (" << S1->X() << "," << S1->Y() << "," << S1->Z() << ")");
+  MESSAGE("S2 (" << S2->X() << "," << S2->Y() << "," << S2->Z() << ")");
+  MESSAGE("S4 (" << S4->X() << "," << S4->Y() << "," << S4->Z() << ")");
+  MESSAGE("S3 (" << S3->X() << "," << S3->Y() << "," << S3->Z() << ")");
 
-    MESSAGE("Pg (" << Pg->X() << "," << Pg->Y() << "," << Pg->Z() << ")");
-    MESSAGE("Pd (" << Pd->X() << "," << Pd->Y() << "," << Pd->Z() << ")");
-    MESSAGE("Ph (" << Ph->X() << "," << Ph->Y() << "," << Ph->Z() << ")");
-    MESSAGE("Pb (" << Pb->X() << "," << Pb->Y() << "," << Pb->Z() << ")");
-  }
+  MESSAGE("Pg (" << Pg->X() << "," << Pg->Y() << "," << Pg->Z() << ")");
+  MESSAGE("Pd (" << Pd->X() << "," << Pd->Y() << "," << Pd->Z() << ")");
+  MESSAGE("Ph (" << Ph->X() << "," << Ph->Y() << "," << Ph->Z() << ")");
+  MESSAGE("Pb (" << Pb->X() << "," << Pb->Y() << "," << Pb->Z() << ")");
 
   xOut = ((1.-u)*Pg->X() + v*Ph->X() + u*Pd->X() + (1.-v)*Pb->X()) - (1.-u)*(1.-v)*S1->X() - u*(1.-v)*S2->X() - u*v*S3->X() - (1.-u)*v*S4->X();
   yOut = ((1.-u)*Pg->Y() + v*Ph->Y() + u*Pd->Y() + (1.-v)*Pb->Y()) - (1.-u)*(1.-v)*S1->Y() - u*(1.-v)*S2->Y() - u*v*S3->Y() - (1.-u)*v*S4->Y();
   zOut = ((1.-u)*Pg->Z() + v*Ph->Z() + u*Pd->Z() + (1.-v)*Pb->Z()) - (1.-u)*(1.-v)*S1->Z() - u*(1.-v)*S2->Z() - u*v*S3->Z() - (1.-u)*v*S4->Z();
 
-  if (MYDEBUG){
-    MESSAGE("_nodeInterpolationUV() OUT("<<xOut<<","<<yOut<<","<<zOut<<" )");
-  }
+  MESSAGE("_nodeInterpolationUV() OUT("<<xOut<<","<<yOut<<","<<zOut<<" )");
 }
 
 // =========================================================== getFaceShapes
@@ -1494,7 +1470,7 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
             }
         }
 /**********************************************  Abu 2011-11-04 (getEnd()) */
-    if (MYDEBUG){
+    if (SALOME::VerbosityActivated()){
       MESSAGE("_intersect() : OK");
       for ( int i=1; i <= inter.NbPnt(); ++i ){
         gp_Pnt tmp = inter.Pnt(i);
@@ -1503,7 +1479,7 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
     }
     _found +=1;
   } else {
-    if(MYDEBUG) MESSAGE("_intersect() : KO");
+    MESSAGE("_intersect() : KO");
     result = Pt;
     _notFound +=1;
   }
@@ -1515,7 +1491,7 @@ gp_Pnt SMESH_HexaBlocks::_intersect( const gp_Pnt& Pt,
 // parameters q : IN,  v0: INOUT, v1: INOUT
 void SMESH_HexaBlocks::_searchInitialQuadWay( HEXA_NS::Quad* q, HEXA_NS::Vertex*& v0, HEXA_NS::Vertex*& v1 )
 {
-  if(MYDEBUG) MESSAGE("_searchInitialQuadWay() : begin");
+  MESSAGE("_searchInitialQuadWay() : begin");
   v0 = NULL; v1 = NULL;
   if ( q->getNbrParents() != 1 ) return; // q must be a skin quad
 
@@ -1601,17 +1577,17 @@ void SMESH_HexaBlocks::_searchInitialQuadWay( HEXA_NS::Quad* q, HEXA_NS::Vertex*
       v0 = qB; v1 = qA;
   }
 
-  if(MYDEBUG) MESSAGE("_searchInitialQuadWay() : end");
+  MESSAGE("_searchInitialQuadWay() : end");
 }
 
 SMESH_Group* SMESH_HexaBlocks::_createGroup(HEXA_NS::Group& grHex)
 {
-  if(MYDEBUG) MESSAGE("_createGroup() : : begin   <<<<<<");
+  MESSAGE("_createGroup() : : begin   <<<<<<");
 
   std::string aGrName           = grHex.getName();
   HEXA_NS::EnumGroup grHexKind  = grHex.getKind();
 
-  if(MYDEBUG) MESSAGE("aGrName"<<aGrName);
+  MESSAGE("aGrName"<<aGrName);
 
   SMDSAbs_ElementType aGrType;
   switch ( grHexKind ){
@@ -1627,21 +1603,21 @@ SMESH_Group* SMESH_HexaBlocks::_createGroup(HEXA_NS::Group& grHex)
 
   SMESH_Group* aGr = _theMesh->AddGroup(aGrType, aGrName.c_str());
 
-  if(MYDEBUG) MESSAGE("_createGroup() : end  >>>>>>>>");
+  MESSAGE("_createGroup() : end  >>>>>>>>");
   return aGr;
 }
 
 void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
 {
-  if(MYDEBUG) MESSAGE("_fillGroup() : : begin   <<<<<<");
+  MESSAGE("_fillGroup() : : begin   <<<<<<");
 
   SMESH_Group* aGr = _createGroup( *grHex );
   HEXA_NS::EltBase*  grHexElt   = NULL;
   HEXA_NS::EnumGroup grHexKind  = grHex->getKind();
   int                grHexNbElt = grHex->countElement();
 
-  if(MYDEBUG) MESSAGE("_fillGroup() : kind = " << grHexKind);
-  if(MYDEBUG) MESSAGE("_fillGroup() : count= " << grHexNbElt);
+  MESSAGE("_fillGroup() : kind = " << grHexKind);
+  MESSAGE("_fillGroup() : count= " << grHexNbElt);
 
   // A)Looking for elements ID
   std::vector<const SMDS_MeshElement*> aGrEltIDs;
@@ -1659,7 +1635,7 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
                   aGrEltIDs.push_back(*aVolume);
               }
             } else {
-              if(MYDEBUG) MESSAGE("GROUP OF VOLUME: volume for hexa (id = "<<h->getId()<<") not found");
+              MESSAGE("GROUP OF VOLUME: volume for hexa (id = "<<h->getId()<<") not found");
             }
         }
         break;
@@ -1672,7 +1648,7 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
                   aGrEltIDs.push_back(*aFace);
               }
             } else {
-              if(MYDEBUG) MESSAGE("GROUP OF FACE: face for quad (id = "<<q->getId()<<") not found");
+              MESSAGE("GROUP OF FACE: face for quad (id = "<<q->getId()<<") not found");
             }
         }
         break;
@@ -1685,7 +1661,7 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
                   aGrEltIDs.push_back(*anEdge);
               }
             } else {
-              if(MYDEBUG) MESSAGE("GROUP OF Edge: edge for edge (id = "<<e->getId()<<") not found");
+              MESSAGE("GROUP OF Edge: edge for edge (id = "<<e->getId()<<") not found");
             }
         }
         break;
@@ -1705,7 +1681,7 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
                 }
               }
             } else {
-              if(MYDEBUG) MESSAGE("GROUP OF HEXA NODES: nodes on hexa  (id = "<<h->getId()<<") not found");
+              MESSAGE("GROUP OF HEXA NODES: nodes on hexa  (id = "<<h->getId()<<") not found");
             }
         }
         break;
@@ -1720,7 +1696,7 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
                 }
               }
             } else {
-              if(MYDEBUG) MESSAGE("GROUP OF QUAD NODES: nodes on quad (id = "<<q->getId()<<") not found");
+              MESSAGE("GROUP OF QUAD NODES: nodes on quad (id = "<<q->getId()<<") not found");
             }
         }
         break;
@@ -1733,7 +1709,7 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
                 aGrEltIDs.push_back(*aNode);
               }
             } else {
-              if(MYDEBUG) MESSAGE("GROUP OF EDGE NODES: nodes on edge (id = "<<e->getId()<<") not found");
+              MESSAGE("GROUP OF EDGE NODES: nodes on edge (id = "<<e->getId()<<") not found");
             }
         }
         break;
@@ -1743,7 +1719,7 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
             if ( _node.count(v)>0 ){
               aGrEltIDs.push_back(_node[v]);
             } else {
-              if(MYDEBUG) MESSAGE("GROUP OF VERTEX NODES: nodes for vertex (id = "<<v->getId()<<") not found");
+              MESSAGE("GROUP OF VERTEX NODES: nodes for vertex (id = "<<v->getId()<<") not found");
             }
         }
         break;
@@ -1758,5 +1734,5 @@ void SMESH_HexaBlocks::_fillGroup(HEXA_NS::Group* grHex )
     aGroupDS->SMDSGroup().Add( aGrEltIDs[i] );
   };
 
-  if(MYDEBUG) MESSAGE("_fillGroup() : end  >>>>>>>>");
+  MESSAGE("_fillGroup() : end  >>>>>>>>");
 }

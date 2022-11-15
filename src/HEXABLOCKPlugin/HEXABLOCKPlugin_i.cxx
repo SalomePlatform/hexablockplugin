@@ -31,13 +31,6 @@
 
 #include "hexa_base.hxx"
 
-#ifdef _DEBUG_
-static int MYDEBUG = HEXA_NS::on_debug ();
-#else
-static int MYDEBUG = 0;
-#endif
-
-
 using namespace std;
 
 template <class T> class HEXABLOCKPlugin_Creator_i:public HypothesisCreator_i<T>
@@ -57,7 +50,7 @@ extern "C"
   HEXABLOCKPLUGINENGINE_EXPORT
   GenericHypothesisCreator_i* GetHypothesisCreator (const char* aHypName)
   {
-    if(MYDEBUG) MESSAGE("GetHypothesisCreator " << aHypName);
+    MESSAGE("GetHypothesisCreator " << aHypName);
 
     GenericHypothesisCreator_i* aCreator = 0;
 

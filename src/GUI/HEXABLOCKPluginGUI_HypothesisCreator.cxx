@@ -56,12 +56,6 @@
 #include <stdexcept>
 #include <utilities.h>
 
-#ifdef _DEBUG_
-static int MYDEBUG = 1;
-#else
-static int MYDEBUG = 0;
-#endif
-
 
 // tabs
 enum {
@@ -166,7 +160,7 @@ void DoubleLineEditDelegate::setModelData(QWidget *editor, QAbstractItemModel *m
 
     if (ok) {
         model->setData(index, value, Qt::EditRole);
-        if(MYDEBUG) MESSAGE("Value " << value << " was set at index(" << index.row() << "," << index.column() << ")");
+        MESSAGE("Value " << value << " was set at index(" << index.row() << "," << index.column() << ")");
     }
 }
 
@@ -380,11 +374,10 @@ bool HEXABLOCKPluginGUI_HypothesisCreator::smpVertexExists(double x, double y, d
 //           MESSAGE("Found y value " << y << " at row " << i);
           double myZ = mySmpModel->data(mySmpModel->index(i, ENF_VER_Z_COLUMN)).toDouble();
           if (myZ == z) {
-            if (MYDEBUG){
-              MESSAGE("Found x value " << x << " at row " << i);
-              MESSAGE("Found y value " << y << " at row " << i);
-              MESSAGE("Found z value " << z << " at row " << i);
-            }
+            MESSAGE("Found x value " << x << " at row " << i);
+            MESSAGE("Found y value " << y << " at row " << i);
+            MESSAGE("Found z value " << z << " at row " << i);
+
             return true;
           }
         }
@@ -407,7 +400,7 @@ bool HEXABLOCKPluginGUI_HypothesisCreator::checkVertexIsDefined()
 
 void HEXABLOCKPluginGUI_HypothesisCreator::onVertexBtnClicked()
 {
-    if (MYDEBUG) MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::onVertexBtnClicked()");
+    MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::onVertexBtnClicked()");
     const int row = mySmpModel->rowCount() ;
     double x = myXCoord->text().toDouble();
     double y = myYCoord->text().toDouble();
@@ -454,7 +447,7 @@ void HEXABLOCKPluginGUI_HypothesisCreator::onRemoveVertexBtnClicked()
     it.toBack();
     while ( it.hasPrevious() ) {
         row = it.previous();
-        if (MYDEBUG) MESSAGE("delete row #"<< row);
+        MESSAGE("delete row #"<< row);
         mySmpModel->removeRow(row );
     }
     myEnforcedTableView->clearSelection();
@@ -476,7 +469,7 @@ void HEXABLOCKPluginGUI_HypothesisCreator::updateWidgets()
 
 bool HEXABLOCKPluginGUI_HypothesisCreator::checkParams(QString& msg) const
 {
-  if (MYDEBUG) MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::checkParams");
+  MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::checkParams");
 
   if ( !QFileInfo( myWorkingDir->text().trimmed() ).isWritable() ) {
     SUIT_MessageBox::warning( dlg(),
@@ -490,7 +483,7 @@ bool HEXABLOCKPluginGUI_HypothesisCreator::checkParams(QString& msg) const
 
 void HEXABLOCKPluginGUI_HypothesisCreator::retrieveParams() const
 {
-  if (MYDEBUG) MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::retrieveParams");
+  MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::retrieveParams");
   HEXABLOCKHypothesisData data;
   readParamsFromHypo( data );
 
@@ -538,7 +531,7 @@ void HEXABLOCKPluginGUI_HypothesisCreator::retrieveParams() const
     mySmpModel->setData(mySmpModel->index(row, ENF_VER_SIZE_COLUMN),size);
     mySmpModel->setItem( row, ENF_VER_SIZE_COLUMN, new QStandardItem(QString::number(size)) );
 
-    if (MYDEBUG) MESSAGE("Row " << row << ": (" << x << ","<< y << ","<< z << ") ="<< size);
+    MESSAGE("Row " << row << ": (" << x << ","<< y << ","<< z << ") ="<< size);
     row++;
   }
   
@@ -548,7 +541,7 @@ void HEXABLOCKPluginGUI_HypothesisCreator::retrieveParams() const
 
 QString HEXABLOCKPluginGUI_HypothesisCreator::storeParams() const
 {
-    if (MYDEBUG) MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::storeParams");
+    MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::storeParams");
     HEXABLOCKHypothesisData data;
     readParamsFromWidgets( data );
     storeParamsToHypo( data );
@@ -608,13 +601,13 @@ QString HEXABLOCKPluginGUI_HypothesisCreator::storeParams() const
             valStr += ";";
     }
     valStr += " #END ENFORCED VERTICES#";
-    if (MYDEBUG) MESSAGE(valStr.toStdString());
+    MESSAGE(valStr.toStdString());
   return valStr;
 }
 
 bool HEXABLOCKPluginGUI_HypothesisCreator::readParamsFromHypo( HEXABLOCKHypothesisData& h_data ) const
 {
-  if (MYDEBUG) MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::readParamsFromHypo");
+  MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::readParamsFromHypo");
   HEXABLOCKPlugin::HEXABLOCKPlugin_Hypothesis_var h =
     HEXABLOCKPlugin::HEXABLOCKPlugin_Hypothesis::_narrow( initParamsHypothesis() );
 
@@ -655,7 +648,7 @@ bool HEXABLOCKPluginGUI_HypothesisCreator::readParamsFromHypo( HEXABLOCKHypothes
 
 bool HEXABLOCKPluginGUI_HypothesisCreator::storeParamsToHypo( const HEXABLOCKHypothesisData& h_data ) const
 {
-  if (MYDEBUG) MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::storeParamsToHypo");
+  MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::storeParamsToHypo");
   HEXABLOCKPlugin::HEXABLOCKPlugin_Hypothesis_var h =
     HEXABLOCKPlugin::HEXABLOCKPlugin_Hypothesis::_narrow( hypothesis() );
 
@@ -753,7 +746,7 @@ bool HEXABLOCKPluginGUI_HypothesisCreator::storeParamsToHypo( const HEXABLOCKHyp
 
 bool HEXABLOCKPluginGUI_HypothesisCreator::readParamsFromWidgets( HEXABLOCKHypothesisData& h_data ) const
 {
-  if (MYDEBUG) MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::readParamsFromWidgets");
+  MESSAGE("HEXABLOCKPluginGUI_HypothesisCreator::readParamsFromWidgets");
   h_data.myName                       = myName ? myName->text() : "";
   h_data.myToMeshHoles                = myToMeshHolesCheck->isChecked();
   h_data.myMaximumMemory              = myMaximumMemoryCheck->isChecked() ? myMaximumMemorySpin->value() : -1;
@@ -775,7 +768,7 @@ bool HEXABLOCKPluginGUI_HypothesisCreator::readParamsFromWidgets( HEXABLOCKHypot
     myVertex.push_back(mySmpModel->data(mySmpModel->index(i,ENF_VER_Y_COLUMN)).toDouble());
     myVertex.push_back(mySmpModel->data(mySmpModel->index(i,ENF_VER_Z_COLUMN)).toDouble());
     myVertex.push_back(mySmpModel->data(mySmpModel->index(i,ENF_VER_SIZE_COLUMN)).toDouble());
-    if (MYDEBUG) MESSAGE("Add new enforced vertex (" << myVertex[0] << ", "
+    MESSAGE("Add new enforced vertex (" << myVertex[0] << ", "
                                              << myVertex[1] << ", "
                                              << myVertex[2] << ") = "
                                              << myVertex[3]);

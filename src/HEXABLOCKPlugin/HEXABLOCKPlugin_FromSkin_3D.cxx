@@ -35,30 +35,13 @@
 //#include "utilities.h"
 #include <limits>
 
-// Define error message and _MYDEBUG_ if needed
-#ifdef _DEBUG_
+// Define error message
 #define BAD_MESH_ERR \
   error(SMESH_Comment("Can't detect block-wise structure of the input 2D mesh.\n" \
                       __FILE__ ":" )<<__LINE__)
-//#define _MYDEBUG_
-#else
-#define BAD_MESH_ERR \
-  error(SMESH_Comment("Can't detect block-wise structure of the input 2D mesh"))
-#endif
 
 // Debug output
-#ifdef _MYDEBUG_
 #define _DUMP_(msg) cout << msg << endl
-#else
-#define _DUMP_(msg)
-#endif
-
-
-#ifdef _DEBUG_
-static int MYDEBUG = HEXA_NS::on_debug ();
-#else
-static int MYDEBUG = 0;
-#endif
 
 
 namespace
@@ -67,12 +50,12 @@ namespace
     {
       B_BOTTOM=0, B_RIGHT, B_TOP, B_LEFT, B_FRONT, B_BACK, NB_BLOCK_SIDES
     };
-#ifdef _MYDEBUG_
+
   const char* SBoxSides[] = //!< names of block sides
     {
       "BOTTOM", "RIGHT", "TOP", "LEFT", "FRONT", "BACK", "UNDEFINED"
     };
-#endif    
+   
   enum EQuadEdge //!< edges of quadrangle side
     {
       Q_BOTTOM = 0, Q_RIGHT, Q_TOP, Q_LEFT, NB_QUAD_SIDES
@@ -1091,14 +1074,14 @@ SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D(int hypId, SMESH_Gen* gen, HEXA_NS:
   :SMESH_3D_Algo(hypId, gen),
   _doc( doc )
 {
-  if(MYDEBUG) MESSAGE("SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D");
+  MESSAGE("SMESH_HexaFromSkin_3D::SMESH_HexaFromSkin_3D");
   _name = "HexaFromSkin_3D";
 }
 
 
 SMESH_HexaFromSkin_3D::~SMESH_HexaFromSkin_3D()
 {
-  if(MYDEBUG) MESSAGE("SMESH_HexaFromSkin_3D::~SMESH_HexaFromSkin_3D");
+  MESSAGE("SMESH_HexaFromSkin_3D::~SMESH_HexaFromSkin_3D");
 }
 
 //================================================================================
@@ -1317,7 +1300,7 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
       std::map<HEXA_NS::Hexa*, SMESH_HexaBlocks::SMESHVolumes>& volumesOnHexa,
       std::map<HEXA_NS::Vertex*, SMDS_MeshNode*> vertexNode )
           {
-  if(MYDEBUG) MESSAGE("SMESH_HexaFromSkin_3D::Compute BEGIN");
+  MESSAGE("SMESH_HexaFromSkin_3D::Compute BEGIN");
   _Skin skin;
   int nbBlocks = skin.findBlocks(aMesh);
   if ( nbBlocks == 0 )
@@ -1504,7 +1487,7 @@ bool SMESH_HexaFromSkin_3D::Compute( SMESH_Mesh & aMesh, SMESH_MesherHelper* aHe
 
   } // loop on blocks
 
-  if(MYDEBUG) MESSAGE("SMESH_HexaFromSkin_3D::Compute END");
+  MESSAGE("SMESH_HexaFromSkin_3D::Compute END");
   return true;
 }
 
