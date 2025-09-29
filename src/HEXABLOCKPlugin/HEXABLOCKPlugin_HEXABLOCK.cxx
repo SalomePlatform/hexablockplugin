@@ -329,7 +329,7 @@ bool HEXABLOCKPlugin_HEXABLOCK::Compute2D(SMESH_Mesh& theMesh)
 //     }
 //     return aNewMesh._retn();
 //   } catch (SALOME_Exception& S_ex) {
-//     THROW_SALOME_CORBA_EXCEPTION(S_ex.what(), SALOME::BAD_PARAM);
+//     THROW_SALOME_CORBA_EXCEPTION(S_ex.what(), SALOME_CMOD::BAD_PARAM);
 //   }
 // }
 
